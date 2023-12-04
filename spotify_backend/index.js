@@ -23,6 +23,7 @@ const User = require("./models/User.js"); // fetch User model
 
 const authRoutes = require("./Routes/auth.js");
 const songRoutes = require("./Routes/song.js");
+const playlistRoutes = require("./Routes/playlist.js");
 
 app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
 
@@ -76,7 +77,7 @@ app.get("/", (req, res) => {  // if we use '/home' then server will run there
 
 app.use('/auth', authRoutes);
 app.use('/song', songRoutes); // means whenever use hits '/song' route then call the songRoute.js
-
+app.use('./playlist', playlistRoutes); 
 
 app.get('/test', (req, res) => {// for postman testing purpose
     console.log("Hello ur ./test route is working fine");
