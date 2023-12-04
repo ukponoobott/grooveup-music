@@ -4,7 +4,7 @@
         2. create a moongose schema (structure of a user)
         3. create a model
 
-    there are lots of functions in 'moongose' package
+    there are lots of  functions in 'moongose' package
         - moongose.Schema() 
         - moongose
 */
@@ -42,8 +42,11 @@ const User = new mongoose.Schema({
     subscribedArtists: {
         type: String,
         default: "",
-    }
-
+    },
+    password: {  // just added
+        type: String,
+        required: true,
+    },
 })
 
 //step3

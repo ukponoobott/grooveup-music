@@ -9,20 +9,90 @@
     - on / route lets display text "This is Yashasvi's server" using res.send()
     - to set the localhost:PORT u need to use app.listen(Port no, what to perform)
 
-
 */
 
-const express = require("express");
-const app = express();
+const express = require("express");  // import express package
+const app = express();   // create app from express
+const mongoose = require("mongoose"); // require mongoose into project
+require('dotenv').config() // include .env into project TO access password
 
-const PORT = 200;
+const JwtStrategy = require('passport-jwt').Strategy, // for passport-jwt
+    ExtractJwt = require('passport-jwt').ExtractJwt; 
+const passport = require("passport");
+const User = require("./models/User.js"); // fetch User model
 
-app.get("/", (req, res) => {  // if we use /home then server will run there
-    
-    res.send("This is Yashasvi's server");
+const authRoutes = require("./Routes/auth.js");
+const songRoutes = require("./Routes/song.js");
+
+app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
+
+const PORT = 8080;
+
+// --> setting up mongo data base 
+
+mongoose.connect(   // connecting our backend to mongo's db
+// note: make .env file and write make a 'MONGO_PASSWORD' as key and ur password as 'value' MONGO_PASSWORD="qri123" 
+    'mongodb+srv://yashasviyadav:'+ process.env.MONGO_PASSWORD +'@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority' ,
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    } 
+).then((x) => {
+    console.log("Mongo Db connected successfully");
+}).catch((error) =>{
+    console.log("mongo db connection ERROR ");
 })
 
-app.listen(PORT, () =>{
-    console.log("server running successfully at port number " + PORT);
-}) 
- 
+
+// ---> set up passport-jwt for authenticating users
+
+let opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = process.env.PASSPORT_JWT_SECRETKEY;  // better to use from env variable (.env)
+// opts.issuer = 'accounts.examplesoft.com';   // these 2 are not mandotary lines 
+// opts.audience = 'yoursite.net';
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    User.findOne({id: jwt_payload.sub}, function(err, user) {  // this will find user or error
+
+        // in login
+        // done(error, isUserExists)
+
+        if (err) {   // if error found, then 'jwt tocken not matched', try to login again
+            return done(err, false);
+        }
+        if (user) {  // user found, jwt matched, user logged in 
+            return done(null, user);
+        } else {
+            return done(null, false);  // no error, no user, so create new account
+            // or you could create a new account
+        }
+    });
+})); 
+
+// defining a route 
+app.get("/", (req, res) => {  // if we use '/home' then server will run there
+    res.send("Hello World");
+})
+
+app.use('/auth', authRoutes);
+app.use('/song', songRoutes); // means whenever use hits '/song' route then call the songRoute.js
+
+
+app.get('/test', (req, res) => {// for postman testing purpose
+    console.log("Hello ur ./test route is working fine");
+    res.send('Hello, this is get ./test endpoint!');
+});
+
+app.post('/testing', (req, res) => {    // for postman testing purpose
+    res.send("/testing endpoint is working fine");
+    console.log("/testing endpoint is working fine -- console");
+})
+
+// starting server at desired port
+app.listen(PORT, () => { 
+    console.log("server running at port " + PORT);
+})
+
+
+// "mongoose": "^8.0.2",  // original mongoose version that i removed
+
