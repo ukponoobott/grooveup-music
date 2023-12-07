@@ -17,8 +17,8 @@ const Playlist = new mongoose.Schema({ // step2
         required: true,
     },
     owner:{
-        type: String,
-        required: true,
+        type: mongoose.Types.ObjectId,
+        ref:"user",
     },
     songs: [  // note: [] means array of songs, see playlist will have songs, and each song will have all properties of song Model i.e Name,Thumbnail,track,artist
         {
@@ -26,7 +26,7 @@ const Playlist = new mongoose.Schema({ // step2
             ref: "song", 
         }
     ],
-    collaboratrs: [ // array of collaborators i.e users
+    collaborators: [ // array of collaborators i.e users
         {
             type: mongoose.Types.ObjectId,
             ref: "user", 

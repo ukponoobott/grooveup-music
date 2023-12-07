@@ -77,7 +77,7 @@ app.get("/", (req, res) => {  // if we use '/home' then server will run there
 
 app.use('/auth', authRoutes);
 app.use('/song', songRoutes); // means whenever use hits '/song' route then call the songRoute.js
-app.use('./playlist', playlistRoutes); 
+app.use('/playlist', playlistRoutes); 
 
 app.get('/test', (req, res) => {// for postman testing purpose
     console.log("Hello ur ./test route is working fine");

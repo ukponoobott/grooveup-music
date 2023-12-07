@@ -996,3 +996,767 @@ router.get("/get/mysongs", passport.authenticate("jwt" ,{session: false}), async
 
 module.exports = router;
 ```
+
+# video - 12  : creating get songs by artist and song name API `song/get/artist`   and `song/get/songName`
+
+`Routes/song.js`
+```js
+// here all the song related routes API will be stored 
+
+const express = require("express");
+const router = express.Router();
+const passport = require("passport");
+const Song = require("../models/Song");
+const User = require("../models/User");
+
+// /song/create
+router.post("/create", passport.authenticate("jwt", {session: false}) , async (req,res) => {   // post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
+
+    console.log("= = = = = = = = = = reached /song/create function = = = = = = = = = ")
+
+    // step1 : to create a song we need the name(title), thumbnail, track, artist 
+    const {name, thumbnail, track} = req.body;
+    if(!name || !thumbnail || !track){ // if any field is not complete do not create song
+        return res.status(301).json({err: "Insufficient song data"});
+    }
+
+    const artist = req.user._id;  // this way the id generated while creating the user will fetch the artist
+    const songDetails = {name, thumbnail, track, artist};
+
+    console.log("reached line 22");
+    
+    // reached here means everything is fine, so create a song based on 'Song' schema model
+    const createdSong = await Song.create(songDetails);
+    return res.status(200).json(createdSong);
+
+});
+
+
+//    /song/get/mysongs
+router.get("/get/mysongs", passport.authenticate("jwt" ,{session: false}), async (req,res) => {// post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
+  
+
+    // step1 : reached here means user is authenticated, so we need to now get all the songs whos artist=user._id
+    const songs = await Song.find({artist: req.user._id});  // .findOne() only finds single thing,   .find() will help find all the songs that matched the condition of {artist: req.user._id}
+    return res.status(200).json({data: songs});
+
+})
+
+
+//    /song/get/artist    - get route to get all the songs published by a certian artist 
+router.get("/get/artist", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1: get the artist's id from req.body  
+    const {artistId} = req.body;  // note that we should not take input from req.body in .get() method, so we will change it soon
+    
+    // fetch the artist(user) whose id is artist id
+    const artist = await User.findOne({_id: artistId}); 
+    if(artist){ // if such artist doesn't exists 
+        return res.status(301).json({err: "Artist doesn't exists"});
+    }
+
+    // step2 : fetch all the songs whole artist: artistId
+    const songs = await Song.find({artist: artistId});    // .find() is used to get all the values   .findOne() is used to get only a single value
+    return res.status(200).json({data: songs});     
+
+})
+
+//     /song/get/songname      - get route to get all the songs with exact title - eg. 'baarish'
+router.get("/get/songname", passport.authenticate("jwt", {session: false}), async (req, res) => {
+    
+    // step1 : get the song name from user 
+    const {songName} = req.body;
+
+    // step2 : fetch all the songs with name: songName and return them
+    // here we can add the 'pattern matching' functionality later maybe using regx, such that when a user searched 'baar' the 'baarish' song appears 
+    const songs = await Song.find({name: songName});
+    return res.status(200).json({data: songs});
+})
+
+
+module.exports = router;
+``` 
+
+`index.js`
+```js
+
+/* to get started with the backend
+    - npm init  (get started with the backend)
+    - npm install express or npm i express (install express node modules)
+    - import express package into ur index.js
+    - lets create an app of this express package
+
+    - using this app variable we can make 2 types of API's .get() and .post() 
+    - lets create a get() api using app, .get() has 2 arguments , note : app.get(route on which server will run, respond
+    - on / route lets display text "This is Yashasvi's server" using res.send()
+    - to set the localhost:PORT u need to use app.listen(Port no, what to perform)
+
+*/
+
+const express = require("express");  // import express package
+const app = express();   // create app from express
+const mongoose = require("mongoose"); // require mongoose into project
+require('dotenv').config() // include .env into project TO access password
+
+const JwtStrategy = require('passport-jwt').Strategy, // for passport-jwt
+    ExtractJwt = require('passport-jwt').ExtractJwt; 
+const passport = require("passport");
+const User = require("./models/User.js"); // fetch User model
+
+const authRoutes = require("./Routes/auth.js");
+const songRoutes = require("./Routes/song.js");
+const playlistRoutes = require("./Routes/playlist.js");
+
+app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
+
+const PORT = 8080;
+
+// --> setting up mongo data base 
+
+mongoose.connect(   // connecting our backend to mongo's db
+// note: make .env file and write make a 'MONGO_PASSWORD' as key and ur password as 'value' MONGO_PASSWORD="qri123" 
+    'mongodb+srv://yashasviyadav:'+ process.env.MONGO_PASSWORD +'@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority' ,
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    } 
+).then((x) => {
+    console.log("Mongo Db connected successfully");
+}).catch((error) =>{
+    console.log("mongo db connection ERROR ");
+})
+
+
+// ---> set up passport-jwt for authenticating users
+
+let opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = process.env.PASSPORT_JWT_SECRETKEY;  // better to use from env variable (.env)
+// opts.issuer = 'accounts.examplesoft.com';   // these 2 are not mandotary lines 
+// opts.audience = 'yoursite.net';
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    User.findOne({id: jwt_payload.sub}, function(err, user) {  // this will find user or error
+
+        // in login
+        // done(error, isUserExists)
+
+        if (err) {   // if error found, then 'jwt tocken not matched', try to login again
+            return done(err, false);
+        }
+        if (user) {  // user found, jwt matched, user logged in 
+            return done(null, user);
+        } else {
+            return done(null, false);  // no error, no user, so create new account
+            // or you could create a new account
+        }
+    });
+})); 
+
+// defining a route 
+app.get("/", (req, res) => {  // if we use '/home' then server will run there
+    res.send("Hello World");
+})
+
+app.use('/auth', authRoutes);
+app.use('/song', songRoutes); // means whenever use hits '/song' route then call the songRoute.js
+app.use('./playlist', playlistRoutes); 
+
+app.get('/test', (req, res) => {// for postman testing purpose
+    console.log("Hello ur ./test route is working fine");
+    res.send('Hello, this is get ./test endpoint!');
+});
+
+app.post('/testing', (req, res) => {    // for postman testing purpose
+    res.send("/testing endpoint is working fine");
+    console.log("/testing endpoint is working fine -- console");
+})
+
+// starting server at desired port
+app.listen(PORT, () => { 
+    console.log("server running at port " + PORT);
+})
+
+
+// "mongoose": "^8.0.2",  // original mongoose version that i removed
+
+
+```
+
+
+# video - 13 : creating `playlist/create`   and `playlist/get/:playlistId` 
+
+`Routes/playlist.js`
+```js
+
+const express = require("express");
+const router = express.Router();
+const passport = require("passport");
+
+const Playlist = require("../models/Playlist");
+
+// .post route to create playlist,     /playlist/create    
+router.post("/create", passport.authenticate("jwt", {session: false}), async (req, res) => {
+
+    // step1 : to create a new playlist we need 'playlistName' 'thumbnail' 'songs' and 'owner' 'collaboratrs'
+    // the owner is the one creating the playlist so we do not need to get that from req.body, we can fetch it by ourselves
+    const {name, thumbnail, songs} = req.body;
+    const currUser = req.user; // we got this from req because in middleware fun we authenticated the user
+
+    if(!name || !thumbnail || !songs ){
+        return res.status(301).json({err: "insufficient data to create a playlist"});
+    }
+
+    // step2 : combine all the playlist data and create a playlist with all that
+    const playlistData = {name, thumbnail, songs, owner:currUser._id, collaborators:[]}; // IMP note: in the 'Playlist' model we have created the owner type as  type: mongoose.Types.ObjectId, thats why here we set {owner: currUser._id} initially there are no collaborators
+    
+    const playlist = await Playlist.create(playlistData); 
+    return res.status(200).json(playlist);
+     
+})  
+
+
+
+/*     /playlist/:playlistId   
+
+            note that we used `:` column before playlist id because if we call a route `www.abc.com/login` then it will 
+                    only trigger when we give proper `www.abc.com/login` route, but when we use /playlist/:playlistId   in a API function 
+                    then this means that 'playlistId' is a variable value i.e it can have any type of value in place of 'playlistId' and this API will be called
+                    for eg. if i type   '/playlist/12dsf' '/playlist/abcs2'  '/playlist/okns' then also this API function will call. coz `:` opearator makes a value as variable
+*/
+
+// get route API - to get a playlist with a certain playlistid match
+router.get("/get/:playlistId", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1 : we discussed earlier then we should not take any thing from req.body in a .get() API coz it is not a good practice, thats why we used the `:` symbol using which we can fetch the playlist id from the route itself (given by user)
+    const playlistId = req.params.playlistId; // fetched data from the route (without using req.body)
+
+    // step2 : search for this playlist with given playlist id
+    const playlist = await Playlist.findOne({_id: playlistId});
+
+    if(!playlist){ // no such playlist exists 
+        return res.status(301).json({err: "invalid playlist id"})
+    }
+
+    return res.status(200).json(playlist);
+      
+}) 
+
+module.exports = router;
+```
+
+`index.js`
+```js
+
+/* to get started with the backend
+    - npm init  (get started with the backend)
+    - npm install express or npm i express (install express node modules)
+    - import express package into ur index.js
+    - lets create an app of this express package
+
+    - using this app variable we can make 2 types of API's .get() and .post() 
+    - lets create a get() api using app, .get() has 2 arguments , note : app.get(route on which server will run, respond
+    - on / route lets display text "This is Yashasvi's server" using res.send()
+    - to set the localhost:PORT u need to use app.listen(Port no, what to perform)
+
+*/
+
+const express = require("express");  // import express package
+const app = express();   // create app from express
+const mongoose = require("mongoose"); // require mongoose into project
+require('dotenv').config() // include .env into project TO access password
+
+const JwtStrategy = require('passport-jwt').Strategy, // for passport-jwt
+    ExtractJwt = require('passport-jwt').ExtractJwt; 
+const passport = require("passport");
+const User = require("./models/User.js"); // fetch User model
+
+const authRoutes = require("./Routes/auth.js");
+const songRoutes = require("./Routes/song.js");
+const playlistRoutes = require("./Routes/playlist.js");
+
+app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
+
+const PORT = 8080;
+
+// --> setting up mongo data base 
+
+mongoose.connect(   // connecting our backend to mongo's db
+// note: make .env file and write make a 'MONGO_PASSWORD' as key and ur password as 'value' MONGO_PASSWORD="qri123" 
+    'mongodb+srv://yashasviyadav:'+ process.env.MONGO_PASSWORD +'@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority' ,
+    {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    } 
+).then((x) => {
+    console.log("Mongo Db connected successfully");
+}).catch((error) =>{
+    console.log("mongo db connection ERROR ");
+})
+
+
+// ---> set up passport-jwt for authenticating users
+
+let opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = process.env.PASSPORT_JWT_SECRETKEY;  // better to use from env variable (.env)
+// opts.issuer = 'accounts.examplesoft.com';   // these 2 are not mandotary lines 
+// opts.audience = 'yoursite.net';
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+    User.findOne({id: jwt_payload.sub}, function(err, user) {  // this will find user or error
+
+        // in login
+        // done(error, isUserExists)
+
+        if (err) {   // if error found, then 'jwt tocken not matched', try to login again
+            return done(err, false);
+        }
+        if (user) {  // user found, jwt matched, user logged in 
+            return done(null, user);
+        } else {
+            return done(null, false);  // no error, no user, so create new account
+            // or you could create a new account
+        }
+    });
+})); 
+
+// defining a route 
+app.get("/", (req, res) => {  // if we use '/home' then server will run there
+    res.send("Hello World");
+})
+
+app.use('/auth', authRoutes);
+app.use('/song', songRoutes); // means whenever use hits '/song' route then call the songRoute.js
+app.use('./playlist', playlistRoutes); 
+
+app.get('/test', (req, res) => {// for postman testing purpose
+    console.log("Hello ur ./test route is working fine");
+    res.send('Hello, this is get ./test endpoint!');
+});
+
+app.post('/testing', (req, res) => {    // for postman testing purpose
+    res.send("/testing endpoint is working fine");
+    console.log("/testing endpoint is working fine -- console");
+})
+
+// starting server at desired port
+app.listen(PORT, () => { 
+    console.log("server running at port " + PORT);
+})
+
+
+// "mongoose": "^8.0.2",  // original mongoose version that i removed
+
+
+```
+
+
+
+
+# video - 14 : creating an API to get all playlists made by an artist `playlist/get/artist/:artistId` and an API to add a song to the Playlist. `playlist/add/song` 
+
+IMP : in the prv video we created a `playlist/get/:playlistId`  API and today we will create a `playlist/get/:artistId` API but we need to fix the Routes of these 2 APIs because lets say user sends a req for `playlist/get/23hcsf` now this '23hcsf' is id we know but our backend will get confused that whether its a playlistId or a artistId and it will get confused in sending the API req so to fix these we can fix the routes of both the APIs and the new Routes will be  `playlist/get/artist/:artistId` to fetch playlist created by an artist  and `playlist/get/:playlistId`  API to fetch the desired Playlist with a playlist id
+
+
+IMP Note : if a user wants to add a song to a playlist, he must have access to a playlist i.e either he has to be a collaborator or he has to be the owner of that playlist, then only he can add songs to that playlist.
+
+`Routes/playlist.js` 
+```js
+const express = require("express");
+const router = express.Router();
+const passport = require("passport");
+
+const User = require("../models/User");
+const Playlist = require("../models/Playlist");
+
+// .post route to create playlist,     /playlist/create    
+router.post("/create", passport.authenticate("jwt", {session: false}), async (req, res) => {
+
+    // step1 : to create a new playlist we need 'playlistName' 'thumbnail' 'songs' and 'owner' 'collaboratrs'
+    // the owner is the one creating the playlist so we do not need to get that from req.body, we can fetch it by ourselves
+    const {name, thumbnail, songs} = req.body;
+    const currUser = req.user; // we got this from req because in middleware fun we authenticated the user
+
+    if(!name || !thumbnail || !songs ){
+        return res.status(301).json({err: "insufficient data to create a playlist"});
+    }
+
+    // step2 : combine all the playlist data and create a playlist with all that
+    const playlistData = {name, thumbnail, songs, owner:currUser._id, collaborators:[]}; // IMP note: in the 'Playlist' model we have created the owner type as  type: mongoose.Types.ObjectId, thats why here we set {owner: currUser._id} initially there are no collaborators
+    
+    const playlist = await Playlist.create(playlistData); 
+    return res.status(200).json(playlist);
+     
+})  
+
+
+
+/*     /playlist/:playlistId   
+
+            note that we used `:` column before playlist id because if we call a route `www.abc.com/login` then it will 
+                    only trigger when we give proper `www.abc.com/login` route, but when we use /playlist/:playlistId   in a API function 
+                    then this means that 'playlistId' is a variable value i.e it can have any type of value in place of 'playlistId' and this API will be called
+                    for eg. if i type   '/playlist/12dsf' '/playlist/abcs2'  '/playlist/okns' then also this API function will call. coz `:` opearator makes a value as variable
+*/
+
+// get route API - to get a playlist with a certain playlistid match
+router.get("/get/playlist/:playlistId", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1 : we discussed earlier then we should not take any thing from req.body in a .get() API coz it is not a good practice, thats why we used the `:` symbol using which we can fetch the playlist id from the route itself (given by user)
+    const playlistId = req.params.playlistId; // fetched data from the route (without using req.body)
+
+    // step2 : search for this playlist with given playlist id
+    const playlist = await Playlist.findOne({_id: playlistId});
+
+    if(!playlist){ // no such playlist exists 
+        return res.status(301).json({err: "invalid playlist id"})
+    }
+
+    return res.status(200).json(playlist);
+      
+}) 
+
+
+//  /playlist/get/artist/:artistId   get route to get all the playlist created by an artist (artist id)
+router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false}), async (req,res) =>{
+
+    // step 1 : get the artist id (not from req.body) but  from route parameters
+    const artistId = req.params.artistId;
+    
+    // step2 : check if such artist exists or not
+    const artist = await User.findOne({_id: artistId});  // note : _id is a unique id assigned by mongoDb to any schema object
+    if(!artist){
+        return res.status(304).json({err: "invalid artist id"});// no such artist exists
+    }
+
+    // step3 : reached here means artist exists, so fetch all its playlists 
+    const playlists = await Playlist.findOne({owner: artistId}); // note that in the Playlist model we have owner type: mongoose.Types.ObjectId, 
+    return res.status(200).json({data: playlists});
+
+}) 
+
+
+//   /playlist/add/song   - API to add song to a playlist via a user
+router.post("/add/song", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1 : fetch the song id and playlist id 
+    const currentUser = req.user;
+    const {songId, playlistId} = req.body;
+
+    // step 2 : check if such playlist and song both are valid or not 
+    const playlist = await Playlist.findOne({_id: playlistId});
+    const song = await Playlist.find({_id: songId});
+    if(!playlist){
+        return res.status(304).json({err: "playlist doesnt exist"});
+    }
+    if(!song){
+        return res.status(304).json({err: "song doesnt exists"});
+    }
+
+    // reached here means playlist and song both exists, lets now check if user has access to this playlist or not
+    // step1 : to add a song we need to check if the user adding a song has access to add it or not ? (to add a song to playlist user must be a 'collaborator' or 'owner of the playlist')
+    if(playlist.owner == currentUser._id){ // if curr user is neighter the owner nor the collaborator of this playlist 
+        return res.status(400).json({err: "Not allowed"});
+    }
+
+    // reached here means user has access to add songs in playlist, so add the song in to playlist
+    playlist.songs.push(songId);  // inside the songs array of playlist, each song is stored by its mongoseid
+    await playlist.save(); // saving changes to the db
+
+    return res.status(200).json(playlist);
+})
+
+module.exports = router;
+```
+
+
+# Video 15 - lets now test all our Song.js and Playlist.js APIs 
+ 
+lets now test all our APIs one by one and see if theres some correction needed to be done.
+
+`Routes/song.js`  (here we have all song related APIs)
+```js
+// here all the song related routes API will be stored 
+
+const express = require("express");
+const router = express.Router();
+const passport = require("passport");
+const Song = require("../models/Song");
+const User = require("../models/User");
+
+// /song/create
+router.post("/create", passport.authenticate("jwt", {session: false}) , async (req,res) => {   // post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
+
+    // step1 : to create a song we need the name(title), thumbnail, track, artist 
+    const {name, thumbnail, track} = req.body;
+    if(!name || !thumbnail || !track){ // if any field is not complete do not create song
+        return res.status(301).json({err: "Insufficient song data"});
+    }
+
+    const artist = req.user._id;  // this way the id generated while creating the user will fetch the artist
+    const songDetails = {name, thumbnail, track, artist};
+    
+    // reached here means everything is fine, so create a song based on 'Song' schema model
+    const createdSong = await Song.create(songDetails);
+    return res.status(200).json(createdSong);
+
+});
+
+
+//    /song/get/mysongs
+router.get("/get/mysongs", passport.authenticate("jwt" ,{session: false}), async (req,res) => {// post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
+
+    // step1 : reached here means user is authenticated, so we need to now get all the songs whos artist=user._id
+    const songs = await Song.find({artist: req.user._id});  // .findOne() only finds single thing,   .find() will help find all the songs that matched the condition of {artist: req.user._id}
+    return res.status(200).json({data: songs});
+
+})
+
+
+//    /song/get/artist    - get route to get all the songs published by a certian artist 
+router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1: get the artist's id from req.body  
+    const {artistId} = req.params;  // note that we should not take input from req.body in .get() method, so we will fixed it now using req.params
+    
+    // fetch the artist(user) whose id is artist id
+    const artist = await User.findOne({_id: artistId}); 
+    if(!artist){ // if such artist doesn't exists 
+        return res.status(301).json({err: "Artist doesn't exists"});
+    }
+
+    // step2 : fetch all the songs whole artist: artistId
+    const songs = await Song.find({artist: artistId});    // .find() is used to get all the values   .findOne() is used to get only a single value
+    return res.status(200).json({data: songs});     
+
+})
+
+//     /song/get/songname/baarish-song      - get route to get all the songs with exact title - eg. 'baarish'
+router.get("/get/songname/:songName", passport.authenticate("jwt", {session: false}), async (req, res) => {
+    
+    // step1 : get the song name from user 
+    const {songName} = req.params;
+
+    // step2 : fetch all the songs with name: songName and return them
+    // here we can add the 'pattern matching' functionality later maybe using regx, such that when a user searched 'baar' the 'baarish' song appears 
+    const songs = await Song.find({name: songName});
+    return res.status(200).json({data: songs});
+})
+
+
+module.exports = router;
+```
+
+`Routes/playlist.js`(here we have all playlist related APIs)
+```js
+
+const express = require("express");
+const router = express.Router();
+const passport = require("passport");
+
+const User = require("../models/User");
+const Playlist = require("../models/Playlist");
+
+// .post route to create playlist,     /playlist/create    
+router.post("/create", passport.authenticate("jwt", {session: false}), async (req, res) => {
+
+
+    // step1 : to create a new playlist we need 'playlistName' 'thumbnail' 'songs' and 'owner' 'collaboratrs'
+    // the owner is the one creating the playlist so we do not need to get that from req.body, we can fetch it by ourselves
+    const currUser = req.user; // we got this from req because in middleware fun we authenticated the user
+    const {name, thumbnail, songs} = req.body;
+
+    if(!name || !thumbnail || !songs ){
+        return res.status(301).json({err: "insufficient data to create a playlist"});
+    }
+
+    // step2 : combine all the playlist data and create a playlist with all that
+    const playlistData = {name, thumbnail, owner:currUser._id, songs, collaborators:[]}; // IMP note: in the 'Playlist' model we have created the owner type as  type: mongoose.Types.ObjectId, thats why here we set {owner: currUser._id} initially there are no collaborators
+    
+    const playlist = await Playlist.create(playlistData);  // error
+
+    // console.log("reached line 27");
+
+    return res.status(200).json(playlist);
+     
+});
+
+
+/*     /playlist/:playlistId   
+
+            note that we used `:` column before playlist id because if we call a route `www.abc.com/login` then it will 
+                    only trigger when we give proper `www.abc.com/login` route, but when we use /playlist/:playlistId   in a API function 
+                    then this means that 'playlistId' is a variable value i.e it can have any type of value in place of 'playlistId' and this API will be called
+                    for eg. if i type   '/playlist/12dsf' '/playlist/abcs2'  '/playlist/okns' then also this API function will call. coz `:` opearator makes a value as variable
+*/
+
+// get route API - to get a playlist with a certain playlistid match
+router.get("/get/playlist/:playlistId", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1 : we discussed earlier then we should not take any thing from req.body in a .get() API coz it is not a good practice, thats why we used the `:` symbol using which we can fetch the playlist id from the route itself (given by user)
+    const playlistId = req.params.playlistId; // fetched data from the route (without using req.body)
+
+    // step2 : search for this playlist with given playlist id
+    const playlist = await Playlist.findOne({_id: playlistId});
+
+    if(!playlist){ // no such playlist exists 
+        return res.status(301).json({err: "invalid playlist id"})
+    }
+
+    return res.status(200).json(playlist);
+      
+}) 
+
+//  /playlist/get/artist/:artistId   get route to get all the playlist created by an artist (artist id)
+router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false}), async (req,res) =>{
+
+    // step 1 : get the artist id (not from req.body) but  from route parameters
+    const artistId = req.params.artistId;
+    
+    // step2 : check if such artist exists or not
+    const artist = await User.findOne({_id: artistId});  // note : _id is a unique id assigned by mongoDb to any schema object
+    if(!artist){
+        return res.status(304).json({err: "invalid artist id"});// no such artist exists
+    }
+
+    // step3 : reached here means artist exists, so fetch all its playlists 
+    const playlists = await Playlist.find({owner: artistId}); //playlist can be more then 1, note that in the Playlist model we have owner type: mongoose.Types.ObjectId, 
+    return res.status(200).json({data: playlists});
+
+}) 
+
+
+//   /playlist/add/song   - API to add song to a playlist via a user
+router.post("/add/song", passport.authenticate("jwt", {session: false}), async (req,res) => {
+
+    // step1 : fetch the song id and playlist id 
+    const currentUser = req.user;
+    const {songId, playlistId} = req.body;
+
+    // step 2 : check if such playlist and song both are valid or not 
+    const playlist = await Playlist.findOne({_id: playlistId});
+    const song = await Playlist.find({_id: songId});
+    if(!playlist){
+        return res.status(304).json({err: "playlist doesnt exist"});
+    }
+    if(!song){
+        return res.status(304).json({err: "song doesnt exists"});
+    }
+
+    // reached here means playlist and song both exists, lets now check if user has access to this playlist or not
+    // step1 : to add a song we need to check if the user adding a song has access to add it or not ? (to add a song to playlist user must be a 'collaborator' or 'owner of the playlist')
+    if(playlist.owner != currentUser._id && playlist.collaborators.contains(currentUser)){ // if curr user is neighter the owner nor the collaborator of this playlist 
+        return res.status(400).json({err: "Not allowed"});
+    }
+
+    // reached here means user has access to add songs in playlist, so add the song in to playlist
+    playlist.songs.push(songId);  // inside the songs array of playlist, each song is stored by its mongoseid
+    await playlist.save(); // saving changes to the db
+
+    return res.status(200).json(playlist);
+})
+
+module.exports = router;
+```
+
+
+here are the mentioned APIs that we will test :- 
+```
+Account APIs
+- /register ✔️
+- /login ✔️
+
+Songs APIs
+- /song/create ✔️
+- /get/mysongs ⚠️
+- /get/artist/:artistId ⚠️
+- /get/songname/:songName
+
+Playlist APIs
+- /playlist/create
+- /playlist/get/playlist/:playlistId
+- /playlist/get/playlist/artist/:artistId
+- /playlist/add/song
+```
+------
+`/Register` API testing:- 
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288667928-58eea4e3-1d72-4f18-9f50-b54179caa5bb.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T072146Z&X-Amz-Expires=300&X-Amz-Signature=682dcf2979e7f56f21c109c932acc51ccfcc3c6e19540e7f402fd2cb3e92f170&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+----
+
+`/login` API testing :- 
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288668905-fa533c83-e794-4bbc-a145-74d778928c13.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T072529Z&X-Amz-Expires=300&X-Amz-Signature=ff875c84faff765c37937553da6f330caf804cffd476b5c68f0ea722059563fc&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+----
+`/song/create` API teting :- 
+```
+note : only authorized user can create song coz we used the passport.authenticate("jwt"), so to clear that huddle, go to POSTMAN and inside ur API go to 'authorization' tab and select 'bearer token' then in the input field on the left copy the token of the user in there and if user is valid he will be authorized, and will be able to create a song
+
+```
+
+lets authorize us as 'sakil' and pass his token, 
+lets create 2 songs 'hawa-hawa' and 'pani-pani' , artist of both these song will be 'sakil' 
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288670149-c7835da2-995a-4628-b587-5881be3868fb.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T073050Z&X-Amz-Expires=300&X-Amz-Signature=eb08f729e8a76235980e020c936dc48f9eab79520bca964db5aee6f0e95e82be&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288670641-bd1f0875-a417-4b61-a1a2-b30cc2165ece.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T073251Z&X-Amz-Expires=300&X-Amz-Signature=218bdc930c53f5d85a4f77f8271e6c2a01fdced1a91df53ba94b378a17c02b53&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+---
+`/song/get/mysongs` API testing :- 
+
+ERROR⚠️ - all songs are having same artist: ids for some reason  
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288671988-d9e9f0ff-ffad-42d1-9530-3fdf740b55c1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T073834Z&X-Amz-Expires=300&X-Amz-Signature=3d0b0bf96dedc92d39f222b5585d3d38799b77e5798ee50e90cca5da06b89d57&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288675479-4d01926b-bc26-4e3c-a92f-68dfe77e101e.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T074905Z&X-Amz-Expires=300&X-Amz-Signature=a493a4624fd012392e0ec9e0ebdbf9a96dccfed25419a897a1d5392cea3b456e&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+----
+`/get/artist/:artistId ` API testing :- 
+
+ERROR⚠️ - songs from user are not able to be fetched due to error in /mysongs API 
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288678581-f152c624-e13e-4861-920b-a7ddaaa805bd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T075936Z&X-Amz-Expires=300&X-Amz-Signature=93ef59f3f8b5b632e402087a6a1204c9f1cbfb4d7e9d0905795e2c6ccd1e2d47&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
+
+
+
+# video 17 - lets install tailwaind css 
+
+go inside the spotify_backend directory through terminal and run the commands mentioned in the below file :- 
+
+Tailwind version 2 reference : [https://v2.tailwindcss.com/docs/guides/create-react-app](https://v2.tailwindcss.com/docs/guides/create-react-app)
+
+# Video 18 - setting up router 
+
+we need to install some packages for Router 
+```bash
+npm i react-router-dom
+```
+
+`App.js`
+```js 
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
+
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+        <BrowserRouter>
+          <Routes>
+            {/* <Route path="/" element={<h1>Home Page</h1>} />; */}
+            <Route path="/" element={<Home/>} />;
+            <Route path="/error" element={<h1>ERROR Page</h1>} />;
+          </Routes>
+        </BrowserRouter>
+    </div>
+  );
+}
+
+const Home = () => {
+  return (
+    <h1>HOME PAGE</h1>
+  )
+}
+export default App;
+
+```
+yes its working fine.
