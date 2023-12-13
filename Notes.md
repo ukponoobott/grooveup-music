@@ -1,4 +1,5 @@
 # Video 1 - setting up frontend and backend
+
 For frontend :- 
 
 ```bash
@@ -7,18 +8,16 @@ npx create-react-app spotify_frontend (sets up frontend folder)
 npm install   (installs packages)
 
 npm start (starts react app)
-
 ```
 
 For Backend :-
+
 ```bash
 node init  (sets up backend)
 ```
 
-
-
-
 # Video 2 - download express packages for backend, run server on a port, create a db on mongodb
+
 ```cpp
 /* to get started with the backend
     - npm init  (get started with the backend)
@@ -40,14 +39,13 @@ const app = express();
 const PORT = 200;
 
 app.get("/", (req, res) => {  // if we use /home then server will run there
-    
+
     res.send("This is Yashasvi's server");
 })
 
 app.listen(PORT, () =>{
     console.log("server running successfully at port number " + PORT);
 }) 
- 
 ```
 
 # Video 3 - create up user model
@@ -57,6 +55,7 @@ app.listen(PORT, () =>{
 ```
 npm i mongoose  (to install mongoose package into ur backend)
 ```
+
 ```cpp
 /* 3 steps to make a model
         1. require moongose
@@ -112,11 +111,12 @@ module.exports = UserModel; // with this step we can import this file anywhere t
 ```
 
 # Video 4 : song and playlist models
+
 created models for 'song' and 'playlist'
 
 models/Song.js
-```js
 
+```js
 // creating a model
 // step1 : required moongose
 // step2 : using moongose create schema
@@ -148,11 +148,10 @@ const Song = new mongoose.Schema({ // step2
 const SongModel = new mongoose.model("Song", Song); // create a song model named 'Song' with 'Song' schema
 
 module.exports = SongModel;
-
-
-
 ```
+
 models/Playlist.js
+
 ```js
 // creating a model
 // step1 : required mongoose
@@ -198,7 +197,6 @@ const PlaylistModel = new mongoose.model("Playlist", Playlist); // create a Play
 module.exports = PlaylistModel;
 ```
 
-
 # Video - 5 : connecting our index.js (backend file) to our database at mongodb
 
 prerequisite : create a db at mongo db (eg. cluster-0), now go to that cluster and fetch the username and pass of user, if u do not remember then create a new user.
@@ -214,6 +212,7 @@ npm i dotenv     (to install .env into ur backend)
 ```
 
 now create a '.env' named file just into ur root backend folder, and inside that create a key value pair eg. `MONGO_PASSWORD="Pass134"`, and in ur moongose connection string in place of password, write `process.env.MONGO_PASSWORD`, and it will fetch the pass form that file, (this way we can secure our password from attackers, so before deploying project, delete `.env` file)
+
 ```javascript
 mongoose.connect(   // connecting our backend to mongo's db
     'mongodb+srv://yashasviyadav:'+ process.env.MONGO_PASSWORD +'@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority' ,
@@ -226,11 +225,11 @@ mongoose.connect(   // connecting our backend to mongo's db
 }).catch((error) =>{
     console.log("mongo db connection ERROR ");
 })
- 
 ```
 
 make sure to add ur current id address before connecting the mongodb to node server
 ![image](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/286974539-070616a0-a574-43eb-a217-a199c4e79f8e.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231130%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231130T150818Z&X-Amz-Expires=300&X-Amz-Signature=5b7854edd17f5eae03d17ee4242af6b1409c3a9dc87d3e6afd8f173ac239a180&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=725198788)
+
 ```javascript
 server running at port 2000
 Mongo Db connected successfully
@@ -248,16 +247,17 @@ when user (client) tries to log in, he sends a JWT tocken to the server, now ser
 every user has unique jwt, with single jwt we can authenticate 1 user
 
 we need to download/install 2 packages `passport` and `passport-jwt`
+
 ```
 npm i passport passport-jwt    (i means install)
 ```
+
 note : (we can do this is separate lines as well)
 passport-jwt reference : [https://www.passportjs.org/packages/passport-jwt/](https://www.passportjs.org/packages/passport-jwt/)
 
-
 Inside our prv `index.js` file, require the `passport` and `user` model, and paste the function from the above mentioned website as it is (the 2 commented lines are not mandotary)
-```js
 
+```js
 const JwtStrategy = require('passport-jwt').Strategy, // for passport-jwt
     ExtractJwt = require('passport-jwt').ExtractJwt; 
 const User = require("./models/User.js"); // fetch User model
@@ -285,19 +285,19 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
         }
     });
 })); 
-
 ```
+
 note: findOne() is a method that works on 'model' we have model 'User' so User.findOne()
 
 ![image](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/286992605-73c35007-aabd-4b17-a6a9-96459c70b462.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231130%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231130T160723Z&X-Amz-Expires=300&X-Amz-Signature=ee137c37bd1183f7ebcb4b7d54f4ba44e88b9a625c1b45935aff72fca46d93e9&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=725198788)
 
-
-# Video - 7 : Registering New User in Express.js , JWT, MongoDB  
+# Video - 7 : Registering New User in Express.js , JWT, MongoDB
 
 here we will create a signup route, and add authorization functionality in our backend 
 for that we can directly add our route inside index.js but we already have a '/' defined there so we do not want to add all routes in that, so letes create a `Routes/auth.js` and here in `auth.js`  we will add all our authorization routes in this file, so lets work on `auth.js`
 
 to start a route we need to :
+
 - require express
 - we need router method from the express package so ,now we could import app from express() but it has a lot of functions like app.get(), app.post(), ... and we only need the router() method from the express so lets only import that for efficiency
 
@@ -307,14 +307,15 @@ eg. `app.post(path, callback [, callback ...])`
 node :- `Middleware functions` are functions that have access to the request object (req), the response object (res), and the next middleware function in the application’s request-response cycle.
 
 Few packages installed
+
 ```
 npm i bcrypt  (for pass->hash converse)
 npm i jwt   (for jwt tocken creation )
 ```
 
 `This is Routes/Auth.js`
-```js
 
+```js
 const express = require("express");
 // now we could import app from express() but it has a lot of functions like app.get(), app.post(), ... and we only need the Router method from the express so lets only import that for efficiency
 const router = express.Router();
@@ -323,7 +324,7 @@ const bcrypt = require("bcrypt");
 const {getToken} = require("../utils/helpers");
 
 router.post("/register", async (req, res) => { // post req to the route /register
-    
+
     // this func will run when the /register API is called as post request
     //fetch user data from req.body note : while printing we used res.send() because we were giving something, here we want the details from user, whicch we get from 'req.body'
     const {email, password, firstname, lastname, username} = req.body; // note : we did not add password in UserSchema in User.js model because of security reasons
@@ -333,7 +334,7 @@ router.post("/register", async (req, res) => { // post req to the route /registe
     const user = await User.findOne({email: email}); // first email means email of user, second email is the email we defines above
 
     if(user){ // email match was found, user already exists
-        
+
         return res.status(402).json({error: "a user with this email already exists."}) // we used res.send() to send a string on our server, but if we want to send in key,value pair, then use JSON, also status(200) means something is accepted, but since its an error we use status(402) - convention
     }
 
@@ -350,22 +351,20 @@ router.post("/register", async (req, res) => { // post req to the route /registe
     }; 
     const newUser = await User.create(newUserData)
 
-    
+
     // step4 : now our user is created, but since our project is using JWT for tockens, we need to create a tocken and send it to db along with the new User Created, so that whenever user logs in again the tocken is matched
     const token = getToken(email, newUser);  // from the getToken() defined in ../utils/helper.js
-     
+
     // step5 : store newUser in JSON and its token together and then send it, make sure to delete its hashed password, coz its tocken is generated (for security reasons)
     const userToReturn = {...newUser.toJSON(), token};   //... is spread operator means copy all valued of newUser.toJSON() into the 'userToReturn' 
     delete userToReturn.password; 
     return res.status(200).json(userToReturn); // 200 means work is done  (by deafault status:200)
 
 });
-
 ```
 
-
-
 `.utils/helpers.js`
+
 ```js
 //   utils/helpers.js
 
@@ -380,11 +379,9 @@ exports.getToken = async (email, user) => {
 };
 
 module.exports = exports;
-
-
 ```
 
-# video- 8 : Fixing Register User Bugs and Testing New User Creation using `Postman` 
+# video- 8 : Fixing Register User Bugs and Testing New User Creation using `Postman`
 
 now we know that the entry point of each node backend project is the file `index.js`, so we need that to make our `Routes/auth.js` with `/register` functionality work we need to import it in the `index.js` so what we will do is using `app.use()` we will add a `/auth` route and whever user goes to this route the `auth.js` will be invoked and whver the user enters `website.com/auth/register` the register route function inside the auth.js will run
 
@@ -395,8 +392,8 @@ $ npm i jsonwebtoken
 ```
 
 `utils/helpers.js`
-```js
 
+```js
 // this file will have all the methods that we will use again and again, so we are defining all of them here for anywhere use
 
 const jwt = require("jsonwebtoken");  // install `npm i jsonwebtoken`
@@ -415,7 +412,6 @@ module.exports = exports;
 make sure to export the auth.js module at the end of 'Routes/auth.js'
 and import auth.js routes at the top of index.js 
 
-
 Go to [postman.com](https://www.postman.com/) and download and install the app for into ur system
 
 Postman is an application used for API testing purpose, to test ur different types of api's like get, post, etc with diffrent types of data and check what is the output
@@ -433,14 +429,12 @@ User created :-
 User already exists :-
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/287435287-4324548b-3965-4424-a551-0006ece3cf4f.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231202%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231202T094044Z&X-Amz-Expires=300&X-Amz-Signature=de16f514054a297be5ec30266097e0a621653185bf2f5d692fdf762f379f519f&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=725198788)
 
-
 new User `yashasvi` created on our Mongo DB :- 
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/287435623-8b4feaf7-edda-4e07-ab41-616e4262d26c.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231202%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231202T094820Z&X-Amz-Expires=300&X-Amz-Signature=25763e4d8a8987aabf3a541dcaea8c44612709cfda954f71cb9ec5837b50ef4c&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=725198788)
 
-
 `utils/helpers.js`
-```js
 
+```js
 // this file will have all the methods that we will use again and again, so we are defining all of them here for anywhere use
 
 const jwt = require("jsonwebtoken");  // install `npm i jsonwebtoken`
@@ -456,6 +450,7 @@ module.exports = exports;
 ```
 
 `Routes/auth.js`
+
 ```js
 const express = require("express");
 // now we could import app from express() but it has a lot of functions like app.get(), app.post(), ... and we only need the Router method from the express so lets only import that for efficiency
@@ -468,7 +463,7 @@ router.post("/register", async (req, res) => { // post req to the route /registe
 
     console.log("reached /register/auth.js");
     res.send('This is /auth/register route');
-    
+
     // this func will run when the /register API is called as post request
     //fetch user data from req.body note : while printing we used res.send() because we were giving something, here we want the details from user, whicch we get from 'req.body'
     const {email, password, firstName, lastName, username} = req.body; // note : we did not add password in UserSchema in User.js model because of security reasons
@@ -478,7 +473,7 @@ router.post("/register", async (req, res) => { // post req to the route /registe
     const user = await User.findOne({email: email}); // first email means email of user, second email is the email we defines above
 
     if(user){ // email match was found, user already exists
-        
+
         return res.status(403).json({error: "a user with this email already exists."}) // we used res.send() to send a string on our server, but if we want to send in key,value pair, then use JSON, also status(200) means something is accepted, but since its an error we use status(402) - convention
     }
 
@@ -495,10 +490,10 @@ router.post("/register", async (req, res) => { // post req to the route /registe
     }; 
     const newUser = await User.create(newUserData)
 
-    
+
     // step4 : now our user is created, but since our project is using JWT for tockens, we need to create a tocken and send it to db along with the new User Created, so that whenever user logs in again the tocken is matched
     const token = getToken(email, newUser);  // from the getToken() defined in ../utils/helper.js
-     
+
     // console.log(token);
 
     // step5 : store newUser in JSON and its token together and then send it, make sure to delete its hashed password, coz its tocken is generated (for security reasons)
@@ -513,6 +508,7 @@ module.exports = router;
 ```
 
 `./index.js`
+
 ```js
 /* to get started with the backend
     - npm init  (get started with the backend)
@@ -606,13 +602,13 @@ app.listen(PORT, () => {
 })
 ```
 
-# video - 9 : creating /Login route inside './auth.js' 
+# video - 9 : creating /Login route inside './auth.js'
 
 first thing first we need to update our models/User.js i.e `User model` and add the `password` field inside that so that we can store the hashed password (from `auth/register` function), which is a bug from video 8
 
 updated `User.js`
-```js
 
+```js
 /* 3 steps to make a model
         1. require moongose
         2. create a moongose schema (structure of a user)
@@ -672,8 +668,8 @@ module.exports = UserModel; // with this step we can import this file anywhere t
 after adding the `/register` functionality :- 
 
 `Routes/auth.js` 
-```js
 
+```js
 const express = require("express");
 // now we could import app from express() but it has a lot of functions like app.get(), app.post(), ... and we only need the Router method from the express so lets only import that for efficiency
 const router = express.Router();
@@ -695,7 +691,7 @@ router.post("/register", async (req, res) => {  // working fine ✔️
     const user = await User.findOne({email: email}); // first email means email of user, second email is the email we defines above
 
     if(user){ // email match was found, user already exists
-        
+
         return res.status(403).json({error: "a user with this email already exists."}) // we used res.send() to send a string on our server, but if we want to send in key,value pair, then use JSON, also status(200) means something is accepted, but since its an error we use status(402) - convention
     }
 
@@ -715,10 +711,10 @@ router.post("/register", async (req, res) => {  // working fine ✔️
 
     // step4 : now our user is created, but since our project is using JWT for tockens, we need to create a tocken and send it to db along with the new User Created, so that whenever user logs in again the tocken is matched
     const token = await getToken(email, newUser);  // from the getToken() defined in ../utils/helper.js
-     
+
     // step5 : store newUser in JSON and its token together and then send it, make sure to delete its hashed password, coz its tocken is generated (for security reasons)
     const userToReturn = {...newUser.toJSON(), token};   //... is spread operator means copy all valued of newUser.toJSON() into the 'userToReturn' 
-    
+
     // delete userToReturn.password; 
     // console.log(userToReturn);   // this line is removable, its just for error Testing purpose 
 
@@ -743,12 +739,12 @@ router.post("/login", async (req, res) => {
 
     // step4 : reached here means user exists, but password has not been checked yet, but if you remember inside the /register route we have stored the user with 'hashedPassword' inside the data base, but just now inside req.body we got the password in plain text, so how can we compare this?
     // we can not convert hashed pass to original password, but we can convert the org pass to hashed pass again, but to make sure that if plain text password is same then 'hashedPass' should also be same i.e for a password 'hiiampass' hashed code should always be '13#58392skadj' , we can achieve this if we set the 2 parameters of 'hashing' as fix, and which is automatically done by 'bcrypt' , all we have to do is compare
-    
+
     // console.log(user);  // For Error testing purpose 
     // console.log(user.password);
 
     const isPasswordValid = await bcrypt.compare(password, user.password);  // if u have error in this line means we are not able to fetch the password of user
-         
+
     // step5 : pass is not mathed, then return 403 status
     if(!isPasswordValid){
         return res.status(403).json({error: "Invalid Credentials"});
@@ -758,28 +754,25 @@ router.post("/login", async (req, res) => {
     const token = await getToken(user.email, user);
     const userToReturn = {...user.toJSON(), token};
     // delete userToReturn.password; // security purposes 
-    
+
     return res.status(202).json(userToReturn);
 });
 
 module.exports = router;
-
-
 ```
 
 lets create a new user and verify it to test the `auth/register` API :- 
 ![img](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/287513524-45f84f5c-765f-4946-9028-1e60a9e8ff39.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231203%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231203T111452Z&X-Amz-Expires=300&X-Amz-Signature=2840c2a6c39902f323dd90a90cc1b28d00eaaad18519970fe0b913586db92952&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=725198788)
-
 
 lets now veryfy the same user using `auth/login` API with the same ` email and password ` with which we created an account above :-
 
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/287513601-290b11d0-80a0-44ad-b39f-2de697f264a2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231203%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231203T111659Z&X-Amz-Expires=300&X-Amz-Signature=bf7c07e7799ccd5e7a6c8bc8bc1c688efa12368e8aec4de1fe15783e29b2d001&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=725198788)
 'user exists 👆'
 
-
-# video 10 - lets create a song/create route to create a new song 
+# video 10 - lets create a song/create route to create a new song
 
 including `Routes/song` in the index.js
+
 ```js
 /* to get started with the backend
     - npm init  (get started with the backend)
@@ -876,7 +869,6 @@ app.post('/testing', (req, res) => {    // for postman testing purpose
 app.listen(PORT, () => { 
     console.log("server running at port " + PORT);
 })
-
 ```
 
 creating a `song/create` route API :-
@@ -886,6 +878,7 @@ note : we will use a `router.post("/create", passport.authenticate("user") , asy
 this passport.authenticate("jwt") is in `index.js` we added in before videos.
 
 `Routes/song.js`
+
 ```js
 // here all the song related routes API will be stored 
 
@@ -934,6 +927,7 @@ Lets now test the `/song/get/mysongs` API :-
 ![](https://github.com/yashasviyadav1/recipe-webapp/assets/124666305/fb492d1a-798b-4236-9e87-34993de7f59a)
 
 -------------
+
 imp note : if someone is getting this error :
  MongooseError: Model.findOne() no longer accepts a callback
 
@@ -947,7 +941,6 @@ After that run : npm install
 in your terminal, after running it check the downgraded mongoose version by: npm list mongoose 
 see if has downgraded to 5.X.X from your previous version
 This will solve the problem...
-
 
 creating 
 
@@ -976,7 +969,7 @@ router.post("/create", passport.authenticate("jwt", {session: false}) , async (r
     const songDetails = {name, thumbnail, track, artist};
 
     // console.log("reached line 22");
-    
+
     // reached here means everything is fine, so create a song based on 'Song' schema model
     const createdSong = await Song.create(songDetails);
     return res.status(200).json(createdSong);
@@ -986,7 +979,7 @@ router.post("/create", passport.authenticate("jwt", {session: false}) , async (r
 
 //    /song/get/mysongs
 router.get("/get/mysongs", passport.authenticate("jwt" ,{session: false}), async (req,res) => {// post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
-  
+
 
     // step1 : reached here means user is authenticated, so we need to now get all the songs whos artist=user._id
     const songs = await Song.find({artist: req.user._id});  // .findOne() only finds single thing,   .find() will help find all the songs that matched the condition of {artist: req.user._id}
@@ -1000,6 +993,7 @@ module.exports = router;
 # video - 12  : creating get songs by artist and song name API `song/get/artist`   and `song/get/songName`
 
 `Routes/song.js`
+
 ```js
 // here all the song related routes API will be stored 
 
@@ -1024,7 +1018,7 @@ router.post("/create", passport.authenticate("jwt", {session: false}) , async (r
     const songDetails = {name, thumbnail, track, artist};
 
     console.log("reached line 22");
-    
+
     // reached here means everything is fine, so create a song based on 'Song' schema model
     const createdSong = await Song.create(songDetails);
     return res.status(200).json(createdSong);
@@ -1034,7 +1028,7 @@ router.post("/create", passport.authenticate("jwt", {session: false}) , async (r
 
 //    /song/get/mysongs
 router.get("/get/mysongs", passport.authenticate("jwt" ,{session: false}), async (req,res) => {// post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
-  
+
 
     // step1 : reached here means user is authenticated, so we need to now get all the songs whos artist=user._id
     const songs = await Song.find({artist: req.user._id});  // .findOne() only finds single thing,   .find() will help find all the songs that matched the condition of {artist: req.user._id}
@@ -1048,7 +1042,7 @@ router.get("/get/artist", passport.authenticate("jwt", {session: false}), async 
 
     // step1: get the artist's id from req.body  
     const {artistId} = req.body;  // note that we should not take input from req.body in .get() method, so we will change it soon
-    
+
     // fetch the artist(user) whose id is artist id
     const artist = await User.findOne({_id: artistId}); 
     if(artist){ // if such artist doesn't exists 
@@ -1063,7 +1057,7 @@ router.get("/get/artist", passport.authenticate("jwt", {session: false}), async 
 
 //     /song/get/songname      - get route to get all the songs with exact title - eg. 'baarish'
 router.get("/get/songname", passport.authenticate("jwt", {session: false}), async (req, res) => {
-    
+
     // step1 : get the song name from user 
     const {songName} = req.body;
 
@@ -1075,11 +1069,11 @@ router.get("/get/songname", passport.authenticate("jwt", {session: false}), asyn
 
 
 module.exports = router;
-``` 
+```
 
 `index.js`
-```js
 
+```js
 /* to get started with the backend
     - npm init  (get started with the backend)
     - npm install express or npm i express (install express node modules)
@@ -1178,16 +1172,13 @@ app.listen(PORT, () => {
 
 
 // "mongoose": "^8.0.2",  // original mongoose version that i removed
-
-
 ```
 
-
-# video - 13 : creating `playlist/create`   and `playlist/get/:playlistId` 
+# video - 13 : creating `playlist/create`   and `playlist/get/:playlistId`
 
 `Routes/playlist.js`
-```js
 
+```js
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -1208,10 +1199,10 @@ router.post("/create", passport.authenticate("jwt", {session: false}), async (re
 
     // step2 : combine all the playlist data and create a playlist with all that
     const playlistData = {name, thumbnail, songs, owner:currUser._id, collaborators:[]}; // IMP note: in the 'Playlist' model we have created the owner type as  type: mongoose.Types.ObjectId, thats why here we set {owner: currUser._id} initially there are no collaborators
-    
+
     const playlist = await Playlist.create(playlistData); 
     return res.status(200).json(playlist);
-     
+
 })  
 
 
@@ -1238,15 +1229,15 @@ router.get("/get/:playlistId", passport.authenticate("jwt", {session: false}), a
     }
 
     return res.status(200).json(playlist);
-      
+
 }) 
 
 module.exports = router;
 ```
 
 `index.js`
-```js
 
+```js
 /* to get started with the backend
     - npm init  (get started with the backend)
     - npm install express or npm i express (install express node modules)
@@ -1345,21 +1336,16 @@ app.listen(PORT, () => {
 
 
 // "mongoose": "^8.0.2",  // original mongoose version that i removed
-
-
 ```
 
-
-
-
-# video - 14 : creating an API to get all playlists made by an artist `playlist/get/artist/:artistId` and an API to add a song to the Playlist. `playlist/add/song` 
+# video - 14 : creating an API to get all playlists made by an artist `playlist/get/artist/:artistId` and an API to add a song to the Playlist. `playlist/add/song`
 
 IMP : in the prv video we created a `playlist/get/:playlistId`  API and today we will create a `playlist/get/:artistId` API but we need to fix the Routes of these 2 APIs because lets say user sends a req for `playlist/get/23hcsf` now this '23hcsf' is id we know but our backend will get confused that whether its a playlistId or a artistId and it will get confused in sending the API req so to fix these we can fix the routes of both the APIs and the new Routes will be  `playlist/get/artist/:artistId` to fetch playlist created by an artist  and `playlist/get/:playlistId`  API to fetch the desired Playlist with a playlist id
-
 
 IMP Note : if a user wants to add a song to a playlist, he must have access to a playlist i.e either he has to be a collaborator or he has to be the owner of that playlist, then only he can add songs to that playlist.
 
 `Routes/playlist.js` 
+
 ```js
 const express = require("express");
 const router = express.Router();
@@ -1382,10 +1368,10 @@ router.post("/create", passport.authenticate("jwt", {session: false}), async (re
 
     // step2 : combine all the playlist data and create a playlist with all that
     const playlistData = {name, thumbnail, songs, owner:currUser._id, collaborators:[]}; // IMP note: in the 'Playlist' model we have created the owner type as  type: mongoose.Types.ObjectId, thats why here we set {owner: currUser._id} initially there are no collaborators
-    
+
     const playlist = await Playlist.create(playlistData); 
     return res.status(200).json(playlist);
-     
+
 })  
 
 
@@ -1412,7 +1398,7 @@ router.get("/get/playlist/:playlistId", passport.authenticate("jwt", {session: f
     }
 
     return res.status(200).json(playlist);
-      
+
 }) 
 
 
@@ -1421,7 +1407,7 @@ router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false
 
     // step 1 : get the artist id (not from req.body) but  from route parameters
     const artistId = req.params.artistId;
-    
+
     // step2 : check if such artist exists or not
     const artist = await User.findOne({_id: artistId});  // note : _id is a unique id assigned by mongoDb to any schema object
     if(!artist){
@@ -1468,12 +1454,12 @@ router.post("/add/song", passport.authenticate("jwt", {session: false}), async (
 module.exports = router;
 ```
 
+# Video 15 - lets now test all our Song.js and Playlist.js APIs
 
-# Video 15 - lets now test all our Song.js and Playlist.js APIs 
- 
 lets now test all our APIs one by one and see if theres some correction needed to be done.
 
 `Routes/song.js`  (here we have all song related APIs)
+
 ```js
 // here all the song related routes API will be stored 
 
@@ -1494,7 +1480,7 @@ router.post("/create", passport.authenticate("jwt", {session: false}) , async (r
 
     const artist = req.user._id;  // this way the id generated while creating the user will fetch the artist
     const songDetails = {name, thumbnail, track, artist};
-    
+
     // reached here means everything is fine, so create a song based on 'Song' schema model
     const createdSong = await Song.create(songDetails);
     return res.status(200).json(createdSong);
@@ -1517,7 +1503,7 @@ router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false
 
     // step1: get the artist's id from req.body  
     const {artistId} = req.params;  // note that we should not take input from req.body in .get() method, so we will fixed it now using req.params
-    
+
     // fetch the artist(user) whose id is artist id
     const artist = await User.findOne({_id: artistId}); 
     if(!artist){ // if such artist doesn't exists 
@@ -1532,7 +1518,7 @@ router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false
 
 //     /song/get/songname/baarish-song      - get route to get all the songs with exact title - eg. 'baarish'
 router.get("/get/songname/:songName", passport.authenticate("jwt", {session: false}), async (req, res) => {
-    
+
     // step1 : get the song name from user 
     const {songName} = req.params;
 
@@ -1547,8 +1533,8 @@ module.exports = router;
 ```
 
 `Routes/playlist.js`(here we have all playlist related APIs)
-```js
 
+```js
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -1571,13 +1557,13 @@ router.post("/create", passport.authenticate("jwt", {session: false}), async (re
 
     // step2 : combine all the playlist data and create a playlist with all that
     const playlistData = {name, thumbnail, owner:currUser._id, songs, collaborators:[]}; // IMP note: in the 'Playlist' model we have created the owner type as  type: mongoose.Types.ObjectId, thats why here we set {owner: currUser._id} initially there are no collaborators
-    
+
     const playlist = await Playlist.create(playlistData);  // error
 
     // console.log("reached line 27");
 
     return res.status(200).json(playlist);
-     
+
 });
 
 
@@ -1603,7 +1589,7 @@ router.get("/get/playlist/:playlistId", passport.authenticate("jwt", {session: f
     }
 
     return res.status(200).json(playlist);
-      
+
 }) 
 
 //  /playlist/get/artist/:artistId   get route to get all the playlist created by an artist (artist id)
@@ -1611,7 +1597,7 @@ router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false
 
     // step 1 : get the artist id (not from req.body) but  from route parameters
     const artistId = req.params.artistId;
-    
+
     // step2 : check if such artist exists or not
     const artist = await User.findOne({_id: artistId});  // note : _id is a unique id assigned by mongoDb to any schema object
     if(!artist){
@@ -1658,8 +1644,8 @@ router.post("/add/song", passport.authenticate("jwt", {session: false}), async (
 module.exports = router;
 ```
 
-
 here are the mentioned APIs that we will test :- 
+
 ```
 Account APIs
 - /register ✔️
@@ -1677,7 +1663,9 @@ Playlist APIs
 - /playlist/get/playlist/artist/:artistId
 - /playlist/add/song
 ```
+
 ------
+
 `/Register` API testing:- 
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288667928-58eea4e3-1d72-4f18-9f50-b54179caa5bb.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T072146Z&X-Amz-Expires=300&X-Amz-Signature=682dcf2979e7f56f21c109c932acc51ccfcc3c6e19540e7f402fd2cb3e92f170&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
 
@@ -1687,10 +1675,11 @@ Playlist APIs
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288668905-fa533c83-e794-4bbc-a145-74d778928c13.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T072529Z&X-Amz-Expires=300&X-Amz-Signature=ff875c84faff765c37937553da6f330caf804cffd476b5c68f0ea722059563fc&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
 
 ----
+
 `/song/create` API teting :- 
+
 ```
 note : only authorized user can create song coz we used the passport.authenticate("jwt"), so to clear that huddle, go to POSTMAN and inside ur API go to 'authorization' tab and select 'bearer token' then in the input field on the left copy the token of the user in there and if user is valid he will be authorized, and will be able to create a song
-
 ```
 
 lets authorize us as 'sakil' and pass his token, 
@@ -1701,6 +1690,7 @@ lets create 2 songs 'hawa-hawa' and 'pani-pani' , artist of both these song will
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288670641-bd1f0875-a417-4b61-a1a2-b30cc2165ece.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T073251Z&X-Amz-Expires=300&X-Amz-Signature=218bdc930c53f5d85a4f77f8271e6c2a01fdced1a91df53ba94b378a17c02b53&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
 
 ---
+
 `/song/get/mysongs` API testing :- 
 
 ERROR⚠️ - all songs are having same artist: ids for some reason  
@@ -1710,29 +1700,30 @@ ERROR⚠️ - all songs are having same artist: ids for some reason
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288675479-4d01926b-bc26-4e3c-a92f-68dfe77e101e.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T074905Z&X-Amz-Expires=300&X-Amz-Signature=a493a4624fd012392e0ec9e0ebdbf9a96dccfed25419a897a1d5392cea3b456e&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
 
 ----
+
 `/get/artist/:artistId ` API testing :- 
 
 ERROR⚠️ - songs from user are not able to be fetched due to error in /mysongs API 
 
 ![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/288678581-f152c624-e13e-4861-920b-a7ddaaa805bd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231207%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231207T075936Z&X-Amz-Expires=300&X-Amz-Signature=93ef59f3f8b5b632e402087a6a1204c9f1cbfb4d7e9d0905795e2c6ccd1e2d47&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
 
-
-
-# video 17 - lets install tailwaind css 
+# video 17 - lets install tailwaind css
 
 go inside the spotify_backend directory through terminal and run the commands mentioned in the below file :- 
 
 Tailwind version 2 reference : [https://v2.tailwindcss.com/docs/guides/create-react-app](https://v2.tailwindcss.com/docs/guides/create-react-app)
 
-# Video 18 - setting up router 
+# Video 18 - setting up router
 
 we need to install some packages for Router 
+
 ```bash
 npm i react-router-dom
 ```
 
 `App.js`
-```js 
+
+```js
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 
 import './App.css';
@@ -1757,6 +1748,150 @@ const Home = () => {
   )
 }
 export default App;
-
 ```
+
 yes its working fine.
+
+# video - 20 : uninstalling prv postcss and installing latest version 8 of postcss, starting with login page frontend.
+
+lets run a few commands to delete prv postcss and install version 8
+
+first open terminal and go inside `spotify_frontend` directory.
+
+```bash
+npm uninstall postcss
+
+npm i postcss@8
+
+npx tailwindcss@2 -i ./src/index.css -o ./src/output.css
+```
+
+now a new `output.css` is created with all the predefined css commands of tailwind, just include this `output.css` in the `app.js`
+
+```js
+import './output.js'
+```
+
+Lets install the iconify library into out react via terminal (same folder spotify_frontend)
+
+```bash
+npm i --save-dev @iconify/react
+```
+
+# video - 21 : Login page UI creation (part-2)
+
+# video - 22 : adding custom classes to tailwind (and adding poppins font) (login-part-3)
+
+go to `tailwind.config.js` and update the content with this :- 
+
+```bash
+module.exports = {
+
+  purge: [],
+  darkMode: false, // or 'media' or 'class'
+  theme: {
+    extend: {
+      backgroundColor:{
+        "spotify-green":"rgb(30 215 96)", // use like this :-   className="bg-spotify-green"
+      },
+      fontFamily:{
+        "poppins":["Poppins", "sans-serif"] // key will be the keyword used while giving tailwind classes like className="font-poppins"
+      }
+    },
+  },
+  variants: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+```bash
+npx tailwindcss@2 build src/index.css -c tailwind.config.js -o src/output.css
+```
+
+here is the Login Page UI created :- 
+
+![Image](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/289362494-0e93e86d-edcd-46dd-8ac0-effd8f88bb08.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231213%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231213T134550Z&X-Amz-Expires=300&X-Amz-Signature=0513648005fd47bede911adb55862cd921647f64ad0340c1513625b6e77eb8e6&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=676541268)
+
+ 
+
+# Video 24,25 (Complete Sidebar UI)
+
+`Routes/Home.js`
+
+```js
+
+import React from 'react';
+import spotify_logo from '../assets/images/spotify_logo_white.svg'
+import IconText from '../components/shared/IconText';
+import { Icon } from '@iconify/react';
+
+
+export default function Home(){
+    return(
+        <div className='h-full w-full flex'>
+
+            {/* this will be the left pannel */}
+            <div className='h-full w-1/5 bg-black flex flex-col justify-between pb-7'>
+                <div>
+                    <div className='logoDiv p-5' >
+                        <img src={spotify_logo} alt="spotify logo" width={125} />
+                    </div>
+                    <div className='py-5'>
+                        <IconText iconName={"material-symbols:home"} displayText={"Home"} active />
+                        <IconText iconName={"uil:search"} displayText={"Search"} />
+                        <IconText iconName={"clarity:library-solid"} displayText={"Library"} />
+                    </div>
+
+                    <div className='pt-5'>
+                        <IconText iconName={"material-symbols:add-box"} displayText={"Create Playlist"} />
+                        <IconText iconName={"mdi:heart"} displayText={"Liked Songs"} />
+                    </div>
+
+                </div>
+
+                <div className='px-6 '>
+                    <div className='border border-gray-400 text-white flex w-2/5 rounded-full flex justify-center items-center py-1 cursor-pointer hover:border-white'>
+                        <Icon icon="humbleicons:globe" fontSize={18} />
+                        
+                        <div className='ml-1 text-sm font-semibold'>English</div>
+                    </div>
+                </div>
+                
+            </div>
+
+            {/* this will be the right pannel */}
+            <div className='h-full'>
+                
+            </div>
+
+        </div>
+    )
+}
+```
+
+
+
+```js
+import React from 'react';
+import { Icon } from '@iconify/react';
+
+export default function IconText({iconName, displayText, active}){
+    return (
+        <div className='flex items-center justify-start cursor-pointer'>
+            <div className='px-5 py-2'>
+                <Icon icon={iconName} color={active?"white":"gray"} fontSize={25} />
+            </div>
+
+            <div className={`${active?"text-white":"text-gray-500"} text-sm font-semibold hover:text-white`}>
+                {displayText}
+            </div>
+        </div>
+    )
+}
+```
+
+![](https://github.com/yashasviyadav1/spotify-clone/assets/124666305/38c820a3-ae06-41f4-81bf-43b9787d8e0e)
+
+  
