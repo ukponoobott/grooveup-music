@@ -1814,14 +1814,11 @@ here is the Login Page UI created :-
 
 ![Image](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/289362494-0e93e86d-edcd-46dd-8ac0-effd8f88bb08.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231213%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231213T134550Z&X-Amz-Expires=300&X-Amz-Signature=0513648005fd47bede911adb55862cd921647f64ad0340c1513625b6e77eb8e6&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=676541268)
 
- 
-
 # Video 24,25 (Complete Sidebar UI)
 
 `Routes/Home.js`
 
 ```js
-
 import React from 'react';
 import spotify_logo from '../assets/images/spotify_logo_white.svg'
 import IconText from '../components/shared/IconText';
@@ -1854,24 +1851,22 @@ export default function Home(){
                 <div className='px-6 '>
                     <div className='border border-gray-400 text-white flex w-2/5 rounded-full flex justify-center items-center py-1 cursor-pointer hover:border-white'>
                         <Icon icon="humbleicons:globe" fontSize={18} />
-                        
+
                         <div className='ml-1 text-sm font-semibold'>English</div>
                     </div>
                 </div>
-                
+
             </div>
 
             {/* this will be the right pannel */}
             <div className='h-full'>
-                
+
             </div>
 
         </div>
     )
 }
 ```
-
-
 
 ```js
 import React from 'react';
@@ -1892,6 +1887,8 @@ export default function IconText({iconName, displayText, active}){
 }
 ```
 
-![](https://github.com/yashasviyadav1/spotify-clone/assets/124666305/38c820a3-ae06-41f4-81bf-43b9787d8e0e)
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/290208829-38c820a3-ae06-41f4-81bf-43b9787d8e0e.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231215%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231215T151404Z&X-Amz-Expires=300&X-Amz-Signature=f3be73815a6393a78dfea47b72c296dfa559b94e1f0e239812c36aed68145bb4&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
 
-  
+# Vid : 26, 27, 28 : navbar + home page UI
+
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/124666305/290860360-56b510ce-6645-497e-addc-4036e46a091f.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231215%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231215T151347Z&X-Amz-Expires=300&X-Amz-Signature=cde503dac7c365106bdb1c2422400278a7df9eb756d914c74814f51116aa3c94&X-Amz-SignedHeaders=host&actor_id=124666305&key_id=0&repo_id=727325368)
