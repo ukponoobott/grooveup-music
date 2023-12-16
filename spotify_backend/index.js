@@ -20,11 +20,13 @@ const JwtStrategy = require('passport-jwt').Strategy, // for passport-jwt
     ExtractJwt = require('passport-jwt').ExtractJwt; 
 const passport = require("passport");
 const User = require("./models/User.js"); // fetch User model
+const cors = require("cors");  // used to bypass the security policy so that anyone can access this site
 
 const authRoutes = require("./Routes/auth.js");
 const songRoutes = require("./Routes/song.js");
 const playlistRoutes = require("./Routes/playlist.js");
 
+app.use(cors()); // this way we bypass the security and anyone can access the site 
 app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
 
 const PORT = 8080;

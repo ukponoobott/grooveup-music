@@ -1,7 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-export default function TextInput({placeholder, label, className}){ // pass props as parameters
+export default function TextInput({placeholder, label, className, value, setValue}){ // pass props as parameters
     return(
 
         <div className={ `textInputDev space-y-2 w-full flex flex-col items-start ${className}` }>
@@ -15,6 +14,8 @@ export default function TextInput({placeholder, label, className}){ // pass prop
                 type="text"
                 placeholder={placeholder}
                 id={label}
+                value={value} // means that whatever prop 'value' we recieved while calling this component, set it to that comonents property 'value'
+                onChange={(e) => {setValue(e.target.value)}} // means whever the value changes then set the value with updated value
             />
 
         </div>
