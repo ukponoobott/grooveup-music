@@ -46,6 +46,7 @@ const User = new mongoose.Schema({
     password: {  // just added
         type: String,
         required: true,
+        private: true
     },
 })
 

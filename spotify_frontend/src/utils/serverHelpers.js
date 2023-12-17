@@ -18,7 +18,7 @@ export const makeUnauthenticatedPOSTRequest = async (route, body) => {
             },
             body:JSON.stringify(body) // converting the body recieved from user into string format, and set body equals to that
         }
-    ); 
+    );  
 
     // now the response that we fetched will be stored in response in some wierd format so lets correct it
     const formattedResponse = await response.json(); // we have this predefined function in 'response' to format the data in {} JSON 

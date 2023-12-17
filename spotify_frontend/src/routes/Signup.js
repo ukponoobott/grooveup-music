@@ -1,6 +1,7 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {useState} from 'react';
+import {useCookies} from 'react-cookie';  // this is a 'state' hook will be used for storing token in cookies 
 
 import { Icon } from '@iconify/react';
 
@@ -10,14 +11,16 @@ import {makeUnauthenticatedPOSTRequest} from '../utils/serverHelpers';
 
 export default function SignupComponent(){
 
-    //⭐ lets create some states to store 
+    //⭐ lets create some states to store input field datas 
     const [email, setEmail] = useState(""); // empty string means initially set their values to ""
-
     const [confirmEmail, setConfirmEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+
+    const [cookie, setCookie] = useCookies(["token"]); // use cookies state returns there 2 things
+    const navigate = useNavigate();  // import this {hook} from react-router-dom to navigate from 1 route to another
 
     // ERROR FIXING STEPS :- 
     // console.log(email); // we can see that as we change value in email field,  the new value gets saved in value of that field
@@ -32,15 +35,22 @@ export default function SignupComponent(){
             return;
         }
 
-        const data = {email, password, username, firstName, lastName};
+        const data = {email, password, username, firstName, lastName};// fetch the data stored in useState 
         
         // now we have the data in json format, so lets send it to the fun 'makeUnauthenticatedPOSTRequest' which will later send it to the API at backend 
         const response = await makeUnauthenticatedPOSTRequest("/auth/register", data); // 
         
         if(response && !response.err){ // if we did got a response ,and response does not have a 'err' key or error key that we send in the backend code
             // user created and user credentials are stored in response
-            console.log(response);
-            console.log("Success");
+            // console.log(response);
+ 
+            // lets store the token of response into cookies for authentication purpose (login)
+            const token = response.token;
+            const date = new Date();
+            date.setDate(date.getDate() + 30); // set date to 30 days later coz we need to store cookies for 30 days only
+            setCookie("token", token, {path: "/" ,expires: date}); // to store token in cookies we need to install "npm i react-cookie" package, using this "setCookies(key, value, {options})" we can set cookies, note: path is the cookies path where to store it
+            alert('new account created');
+            navigate("/home"); // go to home page when user acc is created, used from 'useNavigate' hook state
         }else{
             alert("failure");
         }
