@@ -1,16 +1,16 @@
 import React from 'react';
 
-export default function TextInput({placeholder, label, className, value, setValue}){ // pass props as parameters
+export default function TextInput({placeholder, label, className, value, setValue, labelClassName}){ // pass props as parameters
     return(
 
         <div className={ `textInputDev space-y-2 w-full flex flex-col items-start ${className}` }>
             
-            <label for={label} className="font-semibold">
+            <label for={label} className={`font-semibold ${labelClassName}`}>
                 {label}
             </label>
 
             <input 
-                className='w-full border border-solid border-gray-600 rounded p-3 placeholder-gray-600'
+                className='w-full border border-solid border-gray-600 rounded p-3 placeholder-gray-600 text-black'
                 type="text"
                 placeholder={placeholder}
                 id={label}

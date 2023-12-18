@@ -24,3 +24,35 @@ export const makeUnauthenticatedPOSTRequest = async (route, body) => {
     const formattedResponse = await response.json(); // we have this predefined function in 'response' to format the data in {} JSON 
     return formattedResponse;
 }; 
+
+
+// for authentication POST API calls -> example. makeAuthenticatedPOSTRequest('/auth/login', loginData);
+// note : first study the unAuthenticatedPOSTReq, then only different in auth and unAuth is that in AuthPostReq function we have the bearer token 
+export const makeAuthenticatedPOSTRequest = async (route, body) => {
+    
+    const token = getToken();
+    // we will use 'fetch' to make API calls in javascript
+    // fetch(backendUrl, route, {some thinngs to specify}) will return the response sent by the /route api and store it in response 
+    const response = await fetch(backendUrl + route, 
+        {
+            method:"POST",  // by default fetch has 'GET' req so we want 'POST' so lets specify that
+            headers:{
+                "Content-Type":"application/json", // we need to specify the headers content type as well
+                "Authorization":`Bearer ${token}`
+            },
+            body:JSON.stringify(body) // converting the body recieved from user into string format, and set body equals to that
+        }
+    );  
+
+    // now the response that we fetched will be stored in response in some wierd format so lets correct it
+    const formattedResponse = await response.json(); // we have this predefined function in 'response' to format the data in {} JSON 
+    return formattedResponse;
+}; 
+
+const getToken = () => {
+    const accessToken = document.cookie.replace( // getting the token from cookies using regExpression
+        /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+    );
+    return accessToken; 
+}
