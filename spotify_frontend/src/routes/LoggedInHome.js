@@ -1,8 +1,11 @@
 import React from 'react';
+import {useState} from 'react';
 import spotify_logo from '../assets/images/spotify_logo_white.svg'
 import IconText from '../components/shared/IconText';
 import { Icon } from '@iconify/react';
 import TextWithHover from '../components/shared/TextWithHover';
+import {Howl, Howler} from 'howler';
+
 
 // each playlist view stored in array of JSON objs where each object has data of each individual playlist 
 const focusCardsData = [
@@ -44,74 +47,176 @@ const spotifyCardsPlaylist = [
 ];
 
 export default function LoggedInHome(){
+
+    const [soundPlayed, setSoundPlayed] = useState(null); // this state stores the current song playing
+    const [isPaused, setIsPaused] = useState(true); // state to store if curr song is played or paused rn, initially song is paused
+
+    // this play sound func we will use in the song play bar at the bottom of home page (10%)
+    const playSound = (songSrc) => { 
+
+        if(soundPlayed){  // if a song is alrady playing then stop it first
+            soundPlayed.stop();
+        }
+        
+        let sound = new Howl({ 
+            src: [songSrc], // get the src of song that user wants to play now
+            html5: true
+        });
+
+        setSoundPlayed(sound); // update soundPlayed with the current song 
+        sound.play();
+    }
+
+    // this func will pause the curr sound
+    const pauseSound = () => {
+        soundPlayed.stop();
+    }
+
+    // this func will togle the sound -> if its being played then this func stops it, if it is stoped then this func playes it
+    const togglePlayPause = () => {
+        if(isPaused){ 
+            playSound("https://res.cloudinary.com/drrlxyc7e/video/upload/v1703334725/eytgdx92yujddidxdqv8.mp3"); // call the above playSound Func
+            setIsPaused(false); // update isPaused varaible
+        }
+        else{
+            pauseSound(); // call the above pause sound func
+            setIsPaused(true);// update isPaused varaible
+        }
+    }
+    
+
     return(
-        <div className='h-full w-full flex'>
+        <div className='h-full w-full bg-app-black'>
+        
+            {/* this will be the upper 90% screen (without song play bar) */}
+            <div className='h-9/10 w-full flex '>
 
-            {/* this will be the left pannel */}
-            <div className='h-full w-1/5 bg-black flex flex-col justify-between pb-7'>
-                <div>
-                    <div className='logoDiv p-5' >
-                        <img src={spotify_logo} alt="spotify logo" width={125} />
+                {/* this will be the left pannel */}
+                <div className='h-full w-1/5 bg-black flex flex-col justify-between pb-7'>
+                    <div>
+                        <div className='logoDiv p-5' >
+                            <img src={spotify_logo} alt="spotify logo" width={125} />
+                        </div>
+                        <div className='py-5'>
+                            <IconText iconName={"material-symbols:home"} displayText={"Home"} active/>
+                            <IconText iconName={"uil:search"} displayText={"Search"} />
+                            <IconText iconName={"clarity:library-solid"} displayText={"Library"} />
+                            <IconText iconName={"bxs:music"} displayText={"My Music"} />
+                        </div>
+
+                        <div className='pt-5'>
+                            <IconText iconName={"material-symbols:add-box"} displayText={"Create Playlist"} />
+                            <IconText iconName={"mdi:heart"} displayText={"Liked Songs"} />
+                        </div>
+
                     </div>
-                    <div className='py-5'>
-                        <IconText iconName={"material-symbols:home"} displayText={"Home"} active />
-                        <IconText iconName={"uil:search"} displayText={"Search"} />
-                        <IconText iconName={"clarity:library-solid"} displayText={"Library"} />
-                        <IconText iconName={"bxs:music"} displayText={"My Music"} />
 
+                    <div className='px-6 '>
+                        <div className='border border-gray-400 text-white flex w-2/5 rounded-full flex justify-center items-center py-1 cursor-pointer hover:border-white'>
+                            <Icon icon="humbleicons:globe" fontSize={18} />
+                            <div className='ml-1 text-sm font-semibold'>English</div>
+                        </div>
                     </div>
-
-                    <div className='pt-5'>
-                        <IconText iconName={"material-symbols:add-box"} displayText={"Create Playlist"} />
-                        <IconText iconName={"mdi:heart"} displayText={"Liked Songs"} />
-                    </div>
-
+                    
                 </div>
 
-                <div className='px-6 '>
-                    <div className='border border-gray-400 text-white flex w-2/5 rounded-full flex justify-center items-center py-1 cursor-pointer hover:border-white'>
-                        <Icon icon="humbleicons:globe" fontSize={18} />
+                {/* this will be the right pannel */}
+                <div className='h-full w-4/5 bg-app-black'>
                         
-                        <div className='ml-1 text-sm font-semibold'>English</div>
-                    </div>
-                </div>
-                
-            </div>
-
-            {/* this will be the right pannel */}
-            <div className='h-full w-4/5 bg-app-black'>
-                    
-                {/* in the right pannel this will be Navbar  */}
-                <div className='navbar h-1/10 w-full bg-black bg-opacity-40 flex items-center justify-end'>
-                    
-                    <div className='h-full w-1/2 flex items-center'>
-                        <div className='h-full w-3/5 flex items-center justify-around '>
-                            <TextWithHover displayText={"Premium"}/>
-                            <TextWithHover displayText={"Support"}/>
-                            <TextWithHover displayText={"Download"}/>
-                            <div className='h-1/2 border border-gray-500'></div>
-                        </div>
-                        <div className='h-full w-2/5 flex items-center justify-around '>
-                            <TextWithHover displayText={"Upload Song"}/>
-                            <div className='h-10 w-10 py-4 px-4 bg-white flex justify-center items-center rounded-full font-semibold cursor-pointer hover:bg-gray-200'>
-                                YY
+                    {/* in the right pannel this will be Navbar  */}
+                    <div className='navbar h-1/10 w-full bg-black bg-opacity-40 flex items-center justify-end'>
+                        
+                        <div className='h-full w-1/2 flex items-center'>
+                            <div className='h-full w-3/5 flex items-center justify-around '>
+                                <TextWithHover displayText={"Premium"}/>
+                                <TextWithHover displayText={"Support"}/>
+                                <TextWithHover displayText={"Download"}/>
+                                <div className='h-1/2 border border-gray-500'></div>
                             </div>
-                        </div>
+                            <div className='h-full w-2/5 flex items-center justify-around '>
+                                <TextWithHover displayText={"Upload Song"}/>
+                                <div className='h-10 w-10 py-4 px-4 bg-white flex justify-center items-center rounded-full font-semibold cursor-pointer hover:bg-gray-200'>
+                                    YY
+                                </div>
+                            </div>
 
+                        </div>
+                    </div>
+
+                    {/* this will be content below navbar */}
+                    <div className='content h-9/10 p-8 pt-0 text-white overflow-auto'>
+                        <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
+                        <PlaylistView titleText={"Spotify Playlists"} cardsData={spotifyCardsPlaylist}/>
+                        {/* <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/> */}
+                        {/* <PlaylistView titleText={"Spotify Playlists"}/> 
+                        <PlaylistView titleText={"Sounds of India"}/>  */}
+                    </div>
+                    
+                </div>
+            </div>
+
+            {/* this will be song Play bar 10% screen */}
+            <div className='h-1/10 w-full bg-black bg-opacity-30 flex items-center '>
+
+                {/* this will be left part of song play bar */}
+                <div className='w-1/4 h-full flex items-center p-4' >
+                    <img 
+                        // src="https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/Metro_Boomin_-_Heroes_%26_Villains.png/220px-Metro_Boomin_-_Heroes_%26_Villains.png"
+                        src="https://iili.io/JAphpSI.png"
+                        className='h-11 w-11 rounded '
+                        alt="art cover"
+                    />
+                    <div className='pl-4'>
+                        <div className='text-white text-sm text-left cursor-pointer hover:underline max-w-max'>Trance</div>
+                        <div className='text-gray-400 text-xs text-left cursor-pointer hover:underline max-w-max'>Metro Boomin</div>
                     </div>
                 </div>
 
-                {/* this will be content below navbar */}
-                <div className='content h-9/10 p-8 pt-0 text-white overflow-auto'>
-                    <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
-                    <PlaylistView titleText={"Spotify Playlists"} cardsData={spotifyCardsPlaylist}/>
-                    {/* <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/> */}
-                    {/* <PlaylistView titleText={"Spotify Playlists"}/> 
-                    <PlaylistView titleText={"Sounds of India"}/>  */}
-                </div>
-                
-            </div>
+                {/* this will me middle part of song play bar */}
+                <div className='w-2/4 h-full flex justify-center flex-col items-center '>
 
+                     <div className='w-1/3 flex justify-center items-center justify-between  h-full'>
+                        {/* song play,pause,repeat etc, controls */}
+                        <Icon 
+                            icon="mi:shuffle" 
+                            fontSize={20}  
+                            className='text-gray-500 cursor-pointer hover:color-white hover:text-white'
+                        />
+                        <Icon 
+                            icon="fluent:previous-32-filled" 
+                            fontSize={20} 
+                            className='text-gray-500 cursor-pointer hover:text-white' 
+                        />
+                        <Icon  /* Play/Pause icon*/
+                            icon={isPaused?"carbon:play-outline":"carbon:pause-outline"} 
+                            fontSize={35} 
+                            className='text-gray-500 cursor-pointer hover:text-white'
+                            onClick={
+                                ()=>{togglePlayPause()}
+                            }
+                        />
+                        <Icon 
+                            icon="fluent:next-32-filled" 
+                            fontSize={20} 
+                            className='text-gray-500 cursor-pointer hover:text-white'
+                        />
+                        <Icon 
+                            icon="material-symbols:repeat" 
+                            fontSize={20} 
+                            className='text-gray-500 cursor-pointer hover:text-white'
+                        />
+                     </div>
+
+                     <div>
+                        {/* song progress bar */}
+                     </div>
+                </div>
+
+                <div className='w-1/4 h-full' >
+                     
+                </div>
+
+            </div>
         </div>
     )
 }

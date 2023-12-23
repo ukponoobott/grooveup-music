@@ -8,12 +8,15 @@ import SingleSongCard from '../components/shared/SingleSongCard';
 import { makeAuthenticatedGETRequest } from '../utils/serverHelpers';
 import {Howl, Howler} from 'howler';
 
+// note : we want song to play on all pages and routes even if we change the page or route for logged in users and not only on 'myMusic' page, so for that we defined context with 'currSong' and 'setCurrentSong' values to use those values on each page for logged in users
+ 
+
 export default function MyMusic(){
 
     const [songData, setSongData] = useState([]); // songData is a array of obj where each obj will be single song obj 
     const [soundPlayed, setSoundPlayed] = useState(null); // this state stores the current song playing
 
-    // this function will work when some plays music (eg. clicks on single song card )
+    // this function will work when someone plays music (eg. clicks on single song card )
     // this below code is taken from : https://github.com/goldfire/howler.js
     const playSound = (songSrc) => {
 
