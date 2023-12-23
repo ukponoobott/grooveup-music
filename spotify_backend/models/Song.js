@@ -22,7 +22,8 @@ const Song = new mongoose.Schema({ // step2
     },
     artist: {
         type: mongoose.Types.ObjectId, // whenever a user is created an id is also associated with that user, so since a artist is also a user who will have a email, name etc, so it will have an id as well so we use that id of user (thats why we give ref:user)
-        ref: "user",  
+        // ref: "User",  
+        ref: "User",  
     }, 
 }) 
 

@@ -28,7 +28,9 @@ router.post("/create", passport.authenticate("jwt", {session: false}) , async (r
 router.get("/get/mysongs", passport.authenticate("jwt" ,{session: false}), async (req,res) => {// post(route, middleware fun, callback func), note we have set the session:false because we want that every time user creates a new song, it has to be authorized using its token every time
 
     // step1 : reached here means user is authenticated, so we need to now get all the songs whos artist=user._id
-    const songs = await Song.find({artist: req.user._id});  // .findOne() only finds single thing,   .find() will help find all the songs that matched the condition of {artist: req.user._id}
+     // .findOne() only finds single thing,   .find() will help find all the songs that matched the condition of {artist: req.user._id}
+     // .populate("artist") -> now whever we get songs with artist:req.user.id then return it, but in the artist key of that song, do not return only artist id, but return while artists object
+    const songs = await Song.find({artist: req.user._id}).populate("artist"); 
     return res.status(200).json({data: songs});
 
 })

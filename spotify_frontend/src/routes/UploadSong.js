@@ -25,10 +25,7 @@ export default function UploadSong(){
     const navigate = useNavigate(); // to navigate/redirect to pages
 
     const submitSong = async() => {
-        // console.log(name);
-        // console.log(thumbnail);
-        // console.log(playlistUrl);
-        const data = {name, thumbnail, track:playlistUrl};
+        const data = {name, thumbnail, track:playlistUrl}; // fetch data from useStates
 
         // only user whose token is saved in cookies (or authenticated users) can create a new song thats why we use this AuthPost function from frontend that calls the API at backend 
         // this response contains the created song json obj send by backend
