@@ -56,7 +56,7 @@ function App() {
 
 const Home = () => {
   return (
-    <h1>HOME PAGE</h1>
+    <h1 className='pt-5'>/ ROOT PAGE For testing purpose only</h1>
   )
 }
 export default App;
