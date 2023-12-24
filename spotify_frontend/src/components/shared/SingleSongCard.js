@@ -1,11 +1,17 @@
 
+import { useContext } from "react"; // this hook is used to access a particular context in a file
+import songContext from "../../contexts/songContext";
 
 export default function SingleSongCard({info, playSound}){ // 'info' prop will be passed in the myMusic.js to where this info is a object of each song sent my the 'MySong' API from the backend  
 
+    // we want whenever a user clicks on a single song card, data of that song which we get form 'info' prop, will be saved in the 'currSong' of context 'SongContext' for globally use
+    // one this to note is that in App.js i have already made logged in /myMusic route to access songContext and this 'singleSongCard' is a children of 'mySongs' route so it can also access that songcontext
+    const {currentSong, setCurrentSong} = useContext(songContext); // fetch these 2 values from songContext using hook 'useContext' make sure to use {} and not []
+    
     return(
 
-        // this is a single song card, whenver user clicks on any single song card, run the playSound(info.track) function to play that single song track, info.track has the cloudinary track cloud src
-        <div className="text-white flex hover:bg-gray-400 hover:bg-opacity-20 p-2 rounded-sm" onClick={() => {playSound(info.track)}}> 
+        // this is a single song card, whenver user clicks on any single song card, the info obj (containing all info of this song card track) will be set in the global context value for 'currentSong' via 'setCurrentSong' func
+        <div className="text-white flex hover:bg-gray-400 hover:bg-opacity-20 p-2 rounded-sm" onClick={() => {setCurrentSong(info)}}>  
 
             {/* dynamically importing img in a div */}
             <div className="h-12 w-12 bg-cover bg-center" style={{ 

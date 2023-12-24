@@ -14,10 +14,10 @@ import songContext from './contexts/songContext.js';
 
 function App() {
   
-  const [cookie, setCookie] = useCookies(["token"]); // lets use token from cookies
-
+  
   // note : we want song to play on all pages and routes for logged in users and not only on 'myMusic' page, so for that we defined context with 'currSong' and 'setCurrentSong' values to use those values on each page for logged in users
   const [currentSong, setCurrentSong] = useState(null);  // these state is used from context and will overwrite the value of context when page loads 
+  const [cookie, setCookie] = useCookies(["token"]); // lets use token from cookies
 
   return (
     <div className="App w-screen h-screen font-poppins">
