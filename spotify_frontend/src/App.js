@@ -1,5 +1,5 @@
 import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
-import {useState} from 'react'; 
+import {useContext, useState} from 'react'; 
 import './App.css';
 import './output.css';
 import LoginComponent from './routes/Login.js';
@@ -14,6 +14,10 @@ import songContext from './contexts/songContext.js';
 
 function App() {
   
+  // we can directly fetch context data in App.js (we do not need to use useContext() in App.js to fetch the context values)
+  // note : in App.js we define which routes can access context values and which routes can not, to allow specific routes and their childs to access context values wrap them in 'contextName.Provider' tag 
+  const [soundPlayed, setSoundPlayed] = useState(null); 
+  const [isPaused, setIsPaused] = useState(null);
   
   // note : we want song to play on all pages and routes for logged in users and not only on 'myMusic' page, so for that we defined context with 'currSong' and 'setCurrentSong' values to use those values on each page for logged in users
   const [currentSong, setCurrentSong] = useState(null);  // these state is used from context and will overwrite the value of context when page loads 
@@ -27,7 +31,7 @@ function App() {
           cookie.token?(  
 
             /* since we want our songContext.js values to be accessed by all these components so i wrapped all of them in this songContext component using .Provider predefined function */
-            <songContext.Provider value={{currentSong, setCurrentSong}}>
+            <songContext.Provider value={{currentSong, setCurrentSong, soundPlayed, setSoundPlayed, isPaused, setIsPaused}}> 
               <Routes>
                 <Route path="/" element={<Home/>} />;
                 <Route path="/home" element={<LoggedInHomeComponent/>} /> {/* this is home component for only logged in users*/}

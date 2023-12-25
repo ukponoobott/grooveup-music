@@ -44,7 +44,7 @@ const spotifyCardsPlaylist = [
 export default function Home(){
     return(
         // this below is the repeatitive 'sidebar' 'navbar' 'songBar' code  and inside it is the 'children' prop, (reference : src/containers/LoggedInContainer)
-        <LoggedInContainer> 
+        <LoggedInContainer curActiveScreen={"home"}>  {/* now why we passed this curActiveScreen = home, bacause now wheverever this component renderes, this value 'home'is passed to the Logged In container.js and there that screen becomes active */}
             
             <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
             <PlaylistView titleText={"Spotify Playlists"} cardsData={spotifyCardsPlaylist}/> 

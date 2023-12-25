@@ -24,7 +24,7 @@ export default function MyMusic(){
      }, []); 
 
     return(
-        <LoggedInContainer>  {/* repeatitive navbar,sidebar,songBar are wrapped in this component */}
+        <LoggedInContainer curActiveScreen={"myMusic"}>  {/* repeatitive navbar,sidebar,songBar are wrapped in this component */}
            {/* children begins */}
             {/* song cards container */}
             <div className='text-left text-xl font-semibold pl-2 pb-4 pt-8'>

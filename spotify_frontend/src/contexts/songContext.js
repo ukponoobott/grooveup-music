@@ -8,6 +8,11 @@ import { createContext } from "react";
 const songContext = createContext({
     currentSong: null,
     setCurrentSong: (currentSong) => {}, // these 2 values are default values for the time when page loads for the first time, but we do not want to use these, for this we will create state with these keys in the App.js and in that we will pass the default values as those values will overwrite these values 
+    soundPlayed: null,
+    setSoundPlayed: () => {}, // this state stores the current sound playing
+    isPaused: null,  
+    setIsPaused: ()=>{},  // state to store if curr song is played or paused rn, initially song is paused
+
 });
 
 export default songContext;

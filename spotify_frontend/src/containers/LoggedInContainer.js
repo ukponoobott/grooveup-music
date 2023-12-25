@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useLayoutEffect ,useRef} from 'react';
 import {useState} from 'react';
 import spotify_logo from '../assets/images/spotify_logo_white.svg'
 import IconText from '../components/shared/IconText';
@@ -24,16 +24,45 @@ import songContext from '../contexts/songContext';
 
 
 
-export default function LoggedInContainer({children}){
+export default function LoggedInContainer({children, curActiveScreen}){
 
-    const [soundPlayed, setSoundPlayed] = useState(null); // this state stores the current song playing
-    const [isPaused, setIsPaused] = useState(true); // state to store if curr song is played or paused rn, initially song is paused
-
+    // these are already passed in Provider, so we can here fetch them in this file using 'useContext()' from songContext.js file
     // get the global values of currentSong and setCurrentSong from 'songContext' via 'getContext' hook
-    const {currentSong, setCurrentSong} = useContext(songContext); // this currentSong will have value of obj 'info' of song which is global
-    
-    // this play sound func we will use in the song play bar at the bottom of home page (10%)
-    const playSound = (songSrc) => { 
+    const {currentSong, setCurrentSong, soundPlayed, setSoundPlayed, isPaused, setIsPaused} = useContext(songContext); // this currentSong will have value of obj 'info' of song which is global
+
+    const firstUpdate = useRef(true); // useRef here is used to keep track of this const 
+
+    //basically useEffect will work whenever 'currentSong' (passed at end of useEffect) changes its value or rerenders
+    // this is a problem so lets solve it it using 'useLayoutEffect' which is little bit diff from useEffect
+    useLayoutEffect(()=>{
+
+        // now whenever screen renders for 1st time(on every reload) this value of firstUpdate.current is true, and then we set it to false and return the function
+        // this is the solution to the new song play on every time we switch routes problem  -> how ? beacause the reasong for that problem was that every tiime we play a sng and switch the routes a copy of that song played again in the bg bacause this function 'useLayoutEffect' runs every time we switch routes as well, so whenever we now switch the routes the value of 'firstUpdate=true' and then we set it to false and return the function, so copy of song will not play in bg 
+        // but the new issue that arrises is every time we switch routes the value of states 'soundPlayed' and 'isPaused' are set to null again because they are local for this file only , so to fix this i am moving the 'soundPlayed' and 'isPaused' to context and making them global 
+        if(firstUpdate.current){ 
+            firstUpdate.current = false;
+            return;
+        } 
+
+        if(!currentSong){
+            return;
+        }
+        // console.log("song changed"); // for error check purpose
+        changeSong(currentSong.track);
+
+    },[currentSong && currentSong.track]) // this useLayoutEffect will work only when the currentSong.track changes other wise not 
+
+
+    //2. function to play the soundPlayed 
+    const playSound = () => {
+        if(!soundPlayed){ // if soundPlayed is null do not play it
+            return;
+        }
+        soundPlayed.play(); // play current song
+    }
+
+    // this func will take effect whenever user cicks on a single song card to play that song
+    const changeSong = (songSrc) => { 
 
         if(soundPlayed){  // if a song is alrady playing then stop it first
             soundPlayed.stop();
@@ -44,19 +73,20 @@ export default function LoggedInContainer({children}){
             html5: true
         });
 
-        setSoundPlayed(sound); // update soundPlayed with the current song 
-        sound.play();
+        setSoundPlayed(sound); // update 'soundPlayed' value with the 'currentSong' (sent by the singleSongCard) 
+        sound.play();  // and play this new song
+        setIsPaused(false);
     }
 
-    // this func will pause the curr sound
+    //3. this func will pause the curr sound
     const pauseSound = () => {
-        soundPlayed.stop();
+        soundPlayed.pause();  // when user clicks pause, pause the song
     }
 
-    // this func will togle the sound -> if its being played then this func stops it, if it is stoped then this func playes it
+    //1. this func will togle the sound -> if its being played then this func stops it, if it is stoped then this func playes it
     const togglePlayPause = () => {
         if(isPaused){ 
-            playSound(currentSong.track); // call the above playSound Func
+            playSound(); // when user toggle a song
             setIsPaused(false); // update isPaused varaible
         }
         else{
@@ -78,10 +108,20 @@ export default function LoggedInContainer({children}){
                             <img src={spotify_logo} alt="spotify logo" width={125} />
                         </div>
                         <div className='py-5'>
-                            <IconText iconName={"material-symbols:home"} displayText={"Home"} active/>
-                            <IconText iconName={"uil:search"} displayText={"Search"} />
-                            <IconText iconName={"clarity:library-solid"} displayText={"Library"} />
-                            <IconText iconName={"bxs:music"} displayText={"My Music"} />
+                            <IconText 
+                                iconName={"material-symbols:home"} 
+                                displayText={"Home"} 
+                                targetLink={"/home"} 
+                                active={curActiveScreen === "home"} // if current Active Screen is home then value of active will be 'true' else false
+                            />
+                            <IconText iconName={"uil:search"} displayText={"Search"} active={curActiveScreen === "search"}/>
+                            <IconText iconName={"clarity:library-solid"} displayText={"Library"} active={curActiveScreen === "library"} />
+                            <IconText 
+                                iconName={"bxs:music"} 
+                                displayText={"My Music"} 
+                                targetLink={"/myMusic"}
+                                active={curActiveScreen === "myMusic"} // if current Active Screen is myMusic then value of active will be 'true' else false
+                            />
                         </div>
 
                         <div className='pt-5'>
