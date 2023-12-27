@@ -114,7 +114,12 @@ export default function LoggedInContainer({children, curActiveScreen}){
                                 targetLink={"/home"} 
                                 active={curActiveScreen === "home"} // if current Active Screen is home then value of active will be 'true' else false
                             />
-                            <IconText iconName={"uil:search"} displayText={"Search"} active={curActiveScreen === "search"}/>
+                            <IconText 
+                                iconName={"uil:search"} 
+                                displayText={"Search"} 
+                                active={curActiveScreen === "search"}
+                                targetLink={"/search"}
+                            />
                             <IconText iconName={"clarity:library-solid"} displayText={"Library"} active={curActiveScreen === "library"} />
                             <IconText 
                                 iconName={"bxs:music"} 

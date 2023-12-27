@@ -55,7 +55,8 @@ opts.secretOrKey = process.env.PASSPORT_JWT_SECRETKEY;  // better to use from en
 // opts.issuer = 'accounts.examplesoft.com';   // these 2 are not mandotary lines 
 // opts.audience = 'yoursite.net';
 passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    User.findOne({id: jwt_payload.sub}, function(err, user) {  // this will find user or error
+    // User.findOne({id: jwt_payload.sub}, function(err, user) {  //with this, all songs from all the diff users will be created under single user only (and this is an issue)
+        User.findOne({_id: jwt_payload.identifier}, function(err, user) {  // this will fix the above issue, each different songs by diff users will be listed under their individual 'mySongs' route only
 
         // in login
         // done(error, isUserExists)

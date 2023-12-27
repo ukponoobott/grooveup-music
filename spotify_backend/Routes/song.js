@@ -62,7 +62,7 @@ router.get("/get/songname/:songName", passport.authenticate("jwt", {session: fal
 
     // step2 : fetch all the songs with name: songName and return them
     // here we can add the 'pattern matching' functionality later maybe using regx, such that when a user searched 'baar' the 'baarish' song appears 
-    const songs = await Song.find({name: songName});
+    const songs = await Song.find({name: songName}).populate("artist"); // populate(artist) means wheverever we find songs with desired songname, then in the artist key of that obj, return the complete obj of artist, so that we can use it at the time of ui to display song card 
     return res.status(200).json({data: songs});
 })
 
