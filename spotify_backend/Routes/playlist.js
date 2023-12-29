@@ -44,8 +44,14 @@ router.get("/get/playlist/:playlistId", passport.authenticate("jwt", {session: f
     // step1 : we discussed earlier then we should not take any thing from req.body in a .get() API coz it is not a good practice, thats why we used the `:` symbol using which we can fetch the playlist id from the route itself (given by user)
     const playlistId = req.params.playlistId; // fetched data from the route (without using req.body)
 
-    // step2 : search for this playlist with given playlist id
-    const playlist = await Playlist.findOne({_id: playlistId});
+    // step2 : search for this playlist with given playlist id, if we found a playlist then inside that playlist's obj songs key send the complete song object for each song, and inside the each song obj send the complete json of artist as well
+    // so we are here applying populate artist inside populate songs of playlist
+    const playlist = await Playlist.findOne({_id: playlistId}).populate({
+        path:"songs", // inside songs array for each song return complete obj of each one song
+        populate:{
+            path:"artist" // inside each song return complete artist obj of each song 
+        }
+    });
 
     if(!playlist){ // no such playlist exists 
         return res.status(301).json({err: "invalid playlist id"})
@@ -54,6 +60,23 @@ router.get("/get/playlist/:playlistId", passport.authenticate("jwt", {session: f
     return res.status(200).json(playlist);
       
 }) 
+
+//  /playlist/get/me   get route to get all the playlist created current logged in user  (get all my Playlist )
+router.get("/get/me", passport.authenticate("jwt", {session: false}), async (req,res) =>{
+
+    // since we have used passport.authenticate so we will reach here ones the jwt has verified the token of current user
+    // step 1 : get the current logged in users id 
+    const artistId = req.user._id;
+
+    // step2 : so fetch all its playlists of artist (on basis of 'artistId') 
+    //playlist can be more then 1, note that in the Playlist model we have owner type: mongoose.Types.ObjectId, 
+    const playlists = await Playlist.find({owner: artistId}).populate("owner"); // .populate("owner") means whenever we find playlists with given owner then make sure to return that owners complete json object
+    
+    // return the fetched playlist 
+    return res.status(200).json({data: playlists});
+
+}) 
+
 
 //  /playlist/get/artist/:artistId   get route to get all the playlist created by an artist (artist id)
 router.get("/get/artist/:artistId", passport.authenticate("jwt", {session: false}), async (req,res) =>{

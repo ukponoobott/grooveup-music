@@ -4,7 +4,7 @@ import SingleSongCard from '../components/shared/SingleSongCard';
 import { makeAuthenticatedGETRequest } from '../utils/serverHelpers';
 import {Howl, Howler} from 'howler';
 import LoggedInContainer from '../containers/LoggedInContainer';
-
+ 
 // note : we want song to play on all pages and routes even if we change the page or route for logged in users and not only on 'myMusic' page, so for that we defined context with 'currSong' and 'setCurrentSong' values to use those values on each page for logged in users
  
 export default function MyMusic(){
@@ -22,6 +22,8 @@ export default function MyMusic(){
          getData();
         
      }, []); 
+
+    //  console.log(songData);
 
     return(
         <LoggedInContainer curActiveScreen={"myMusic"}>  {/* repeatitive navbar,sidebar,songBar are wrapped in this component */}

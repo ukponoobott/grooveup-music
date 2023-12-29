@@ -18,18 +18,18 @@ const Playlist = new mongoose.Schema({ // step2
     },
     owner:{
         type: mongoose.Types.ObjectId,
-        ref:"user",
+        ref:"User",
     },
     songs: [  // note: [] means array of songs, see playlist will have songs, and each song will have all properties of song Model i.e Name,Thumbnail,track,artist
         {
             type: mongoose.Types.ObjectId,  //imp: here again each song will have property of song model, so why to create it again, lets use its id 
-            ref: "song", 
+            ref: "Song", 
         }
     ],
     collaborators: [ // array of collaborators i.e users
         {
             type: mongoose.Types.ObjectId,
-            ref: "user", 
+            ref: "User", 
         }
     ]
 

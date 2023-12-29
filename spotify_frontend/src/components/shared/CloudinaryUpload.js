@@ -5,7 +5,7 @@
 import { openUploadWidget } from "../../utils/CloudinaryService";
 import {cloudinary_upload_preset} from '../../config.js';
 
-const CloudinaryUpload = ({setUrl, setName}) => {
+const CloudinaryUpload = ({setUrl, setName}) => { 
 
   const uploadImageWidget = () => {
     let myUploadWidget = openUploadWidget(
@@ -20,9 +20,9 @@ const CloudinaryUpload = ({setUrl, setName}) => {
             setUrl(result.info.secure_url); // storing url into setUrl() in useState of uploadSong
             setName(result.info.original_filename); // store song's file name in the states of whichever file uses this cloudinary upload button
 
-            console.log(result.info); 
-            console.log(result.info.secure_url); // this will br the url of uploaded hosted item 
-            console.log(result.info.original_filename); // this will br the url of uploaded hosted item 
+           //console.log(result.info);  /// complete object of newly created 
+            //console.log(result.info.secure_url); // this will br the url of uploaded hosted item 
+            //console.log(result.info.original_filename); // this will br the url of uploaded hosted item 
         
         }
         else{

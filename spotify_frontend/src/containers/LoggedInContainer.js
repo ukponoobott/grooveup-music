@@ -6,6 +6,9 @@ import { Icon } from '@iconify/react';
 import TextWithHover from '../components/shared/TextWithHover';
 import {Howl, Howler} from 'howler';
 import songContext from '../contexts/songContext';
+import CreatePlaylistModal from '../modals/CreatePlaylistModal';
+import AddToPlaylistModal from '../modals/AddToPlaylistModal';
+import { makeAuthenticatedPOSTRequest } from '../utils/serverHelpers';
 
 /* ⭐imp note : so basically this file contains all the raw code for 'sideBar' 'navbar' and bottom 'songBar' which
                 is used as it is again and again in different routes like '/home' '/mySongs' '/search' etc so we want that we do not render these same things again and again
@@ -25,6 +28,12 @@ import songContext from '../contexts/songContext';
 
 
 export default function LoggedInContainer({children, curActiveScreen}){
+
+    // only render the createPlaylistModal when this state is true
+    const [createPlaylistModalOpen, setCreatePlaylistModalOpen] = useState(false); // state to store whenter create playlist modal is open or closed, initially closed, it will open when user clicks on createPlaylist button   
+
+    // only render the addToPlaylistModal when this state is true
+    const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false); // state to store whenter create playlist modal is open or closed, initially closed, it will open when user clicks on createPlaylist button   
 
     // these are already passed in Provider, so we can here fetch them in this file using 'useContext()' from songContext.js file
     // get the global values of currentSong and setCurrentSong from 'songContext' via 'getContext' hook
@@ -95,9 +104,34 @@ export default function LoggedInContainer({children, curActiveScreen}){
         }
     }
 
+    // func to add curr song to a playlist(given playlist_id) 
+    // note : i declared this func here coz currSong is here
+    const addSongToPlaylist = async (playlistId) =>{
+        const songId = currentSong._id; // fetch currSong id from currSong state
+
+        const payLoad = {playlistId, songId};
+        const response = await makeAuthenticatedPOSTRequest("/playlist/add/song", payLoad); // add song to playlist by calling Post api at backend 
+        
+        if(response._id)// if song successfully added to the desired playlist, then close the AddToPlaylist Modal
+            setAddToPlaylistModalOpen(false)
+    }   
+
     return(
         <div className='h-full w-full bg-app-black'>
-        
+            
+
+            {/* only render the createPlaylistModal when this createPlaylistModalOpen state is set to true */}
+            {createPlaylistModalOpen && <CreatePlaylistModal closeModal={()=>{setCreatePlaylistModalOpen(false)}}/> } {/* we passed the closeModal func as prop to this comp and inside that comp, when user clicks on outter div of the createplaylistModal this state will set to false */}  
+
+            {/* only render the addToPlaylistModal when this addToPlaylistModalOpen state is set to true */}
+            {
+                addToPlaylistModalOpen &&  
+                <AddToPlaylistModal 
+                    closeModal={() => {setAddToPlaylistModalOpen(false)}} 
+                    addSongToPlaylist={addSongToPlaylist} // we need to use this func in the 'AddToPlaylistModal' file so this way we are sending this func from this file to that file 
+                />
+            }  
+
             {/*[content from top navbar to bottom (Excluding songBar)] this will be the upper 90% screen (without song play bar) */}
             <div className={`${currentSong?("h-9/10"):("h-full")} w-full flex `}> {/* when a curr song is null means no song played by user then we this screen will be full (no song bar at bottom), if not null then this screen will take height of 90% of screnn and rest 10%is for songBar*/}
 
@@ -120,7 +154,12 @@ export default function LoggedInContainer({children, curActiveScreen}){
                                 active={curActiveScreen === "search"}
                                 targetLink={"/search"}
                             />
-                            <IconText iconName={"clarity:library-solid"} displayText={"Library"} active={curActiveScreen === "library"} />
+                            <IconText  
+                                iconName={"clarity:library-solid"} 
+                                displayText={"Library"} 
+                                active={curActiveScreen === "library"} 
+                                targetLink={"/library"}
+                            />
                             <IconText 
                                 iconName={"bxs:music"} 
                                 displayText={"My Music"} 
@@ -130,8 +169,17 @@ export default function LoggedInContainer({children, curActiveScreen}){
                         </div>
 
                         <div className='pt-5'>
-                            <IconText iconName={"material-symbols:add-box"} displayText={"Create Playlist"} />
-                            <IconText iconName={"mdi:heart"} displayText={"Liked Songs"} />
+                            <IconText 
+                                iconName={"material-symbols:add-box"} 
+                                displayText={"Create Playlist"} 
+                                onClick={()=>{
+                                    setCreatePlaylistModalOpen(true); // means on clicking the createPlaylist icon, set the createPlaylistModal=true
+                                }}
+                            />
+                            <IconText 
+                                iconName={"mdi:heart"} 
+                                displayText={"Liked Songs"} 
+                            />
                         </div>
 
                     </div>
@@ -147,7 +195,7 @@ export default function LoggedInContainer({children, curActiveScreen}){
 
                 {/* this will be the right pannel */}
                 <div className='h-full w-4/5 bg-app-black'>
-                        
+                     
                     {/* in the right pannel this will be Navbar  */}
                     <div className='navbar h-1/10 w-full bg-black bg-opacity-40 flex items-center justify-end'>
                         
@@ -159,9 +207,12 @@ export default function LoggedInContainer({children, curActiveScreen}){
                                 <div className='h-1/2 border border-gray-500'></div>
                             </div>
                             <div className='h-full w-2/5 flex items-center justify-around '>
-                                <TextWithHover displayText={"Upload Song"}/>
+                                <TextWithHover 
+                                    displayText={"Upload Song"}
+                                    targetLink={"/uploadSong"}
+                                />
                                 <div className='h-10 w-10 py-4 px-4 bg-white flex justify-center items-center rounded-full font-semibold cursor-pointer hover:bg-gray-200'>
-                                    YY
+                                    U
                                 </div>
                             </div>
 
@@ -242,8 +293,18 @@ export default function LoggedInContainer({children, curActiveScreen}){
                         </div>
                     </div>
 
-                    <div className='w-1/4 h-full' >
-                        
+                    <div className='w-1/4 h-full flex items-center justify-end pr-5 space-x-3' >
+                        <Icon 
+                            icon="material-symbols:playlist-add" 
+                            fontSize={30} 
+                            className='text-gray-400 cursor-pointer hover:text-white'
+                            onClick={()=>{setAddToPlaylistModalOpen(true)}} // open the add to playlist modal when user clicks on this playlist icon at the songBar at bottom right
+                        />
+                        <Icon 
+                            icon="ion:heart-outline" 
+                            fontSize={30} 
+                            className='text-gray-400 cursor-pointer hover:text-white' 
+                        />
                     </div>
 
                 </div>

@@ -7,7 +7,8 @@ export default function SingleSongCard({info, playSound}){ // 'info' prop will b
     // we want whenever a user clicks on a single song card, data of that song which we get form 'info' prop, will be saved in the 'currSong' of context 'SongContext' for globally use
     // one this to note is that in App.js i have already made logged in /myMusic route to access songContext and this 'singleSongCard' is a children of 'mySongs' route so it can also access that songcontext
     const {currentSong, setCurrentSong} = useContext(songContext); // fetch these 2 values from songContext using hook 'useContext' make sure to use {} and not []
-    
+
+
     return(
 
         // this is a single song card, whenver user clicks on any single song card, the info obj (containing all info of this song card track) will be set in the global context value for 'currentSong' via 'setCurrentSong' func
@@ -26,9 +27,9 @@ export default function SingleSongCard({info, playSound}){ // 'info' prop will b
                     <div className="text-gray-300 text-xs text-left cursor-pointer hover:underline max-w-max">{info.artist.firstName + " " + info.artist.lastName}</div>
                 </div>
 
-                {/* for track time */}
+                {/* for displaying track time */}
                 <div className="w-1/6 flex justify-center items-center text-gray-300">  {/* for more and like icon and track time */}
-                    3:39
+                    
                 </div>
             </div>
         </div>

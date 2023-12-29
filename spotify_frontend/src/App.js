@@ -11,6 +11,8 @@ import { useCookies } from 'react-cookie';
 import LoggedInHomeComponent from './routes/LoggedInHome.js';
 import songContext from './contexts/songContext.js';
 import SearchPage from './routes/SearchPage.js';
+import Library from './routes/Library.js';
+import SinglePlaylistView from './routes/SinglePlaylistView.js';
 
 function App() {
   
@@ -33,11 +35,13 @@ function App() {
             /* since we want our songContext.js values to be accessed by all these components so i wrapped all of them in this songContext component using .Provider predefined function */
             <songContext.Provider value={{currentSong, setCurrentSong, soundPlayed, setSoundPlayed, isPaused, setIsPaused}}> 
               <Routes>
-                <Route path="/" element={<Home/>} />;
+                <Route path="/" element={<LoggedInHomeComponent/>} />
                 <Route path="/home" element={<LoggedInHomeComponent/>} /> {/* this is home component for only logged in users*/}
                 <Route path="/uploadSong" element={<UploadSong/>} /> 
                 <Route path="/myMusic" element={<MyMusic/>} /> 
                 <Route path="/search" element={<SearchPage/>} /> 
+                <Route path="/library" element={<Library/>} /> 
+                <Route path="/playlist/:playlistId" element={<SinglePlaylistView/>} /> 
                 <Route path="*" element={<Navigate to="/home"/>}/>   {/* if user is logged in then if he goes to any route where he is not supposed to eg. /login or /signup then navigate it to /home route */}
                </Routes>
             </songContext.Provider>
@@ -59,9 +63,9 @@ function App() {
   );
 }
 
-const Home = () => {
-  return (
-    <h1 className='pt-5'>/ ROOT PAGE For testing purpose only</h1>
-  )
-}
+// const Home = () => {
+//   return (
+//     <h1 className='pt-5'>/ ROOT PAGE For testing purpose only</h1>
+//   )
+// }
 export default App;

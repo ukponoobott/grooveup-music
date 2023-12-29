@@ -20,4 +20,4 @@ export default function TextInput({placeholder, label, className, value, setValu
 
         </div>
     )
-}
+} 
