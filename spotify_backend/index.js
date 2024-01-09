@@ -29,13 +29,12 @@ const playlistRoutes = require("./Routes/playlist.js");
 app.use(cors()); // this way we bypass the security and anyone can access the site 
 app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
 
+// const PORT = 8080;
 const PORT = 8080;
 
-// --> setting up mongo data base 
 
-mongoose.connect(   // connecting our backend to mongo's db
-// note: make .env file and write make a 'MONGO_PASSWORD' as key and ur password as 'value' MONGO_PASSWORD="qri123" 
-    'mongodb+srv://yashasviyadav:'+ process.env.MONGO_PASSWORD +'@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority' ,
+mongoose.connect(
+    `mongodb+srv://yashasviyadav:llgmCVZ37TEQM1qB@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority` ,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -43,9 +42,8 @@ mongoose.connect(   // connecting our backend to mongo's db
 ).then((x) => {
     console.log("Mongo Db connected successfully");
 }).catch((error) =>{
-    console.log("mongo db connection ERROR ");
+    console.log("mongo db connection ERROR " + error);
 })
-
 
 // ---> set up passport-jwt for authenticating users
 
