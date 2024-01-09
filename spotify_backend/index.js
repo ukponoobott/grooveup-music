@@ -19,19 +19,25 @@ require('dotenv').config() // include .env into project TO access password
 const JwtStrategy = require('passport-jwt').Strategy, // for passport-jwt
     ExtractJwt = require('passport-jwt').ExtractJwt; 
 const passport = require("passport");
+
 const User = require("./models/User.js"); // fetch User model
 const cors = require("cors");  // used to bypass the security policy so that anyone can access this site
+
+const bodyParser = require("body-parser"); // npm i body-parser  // very imp for using req.body
 
 const authRoutes = require("./Routes/auth.js");
 const songRoutes = require("./Routes/song.js");
 const playlistRoutes = require("./Routes/playlist.js");
+
+// Use body-parser middleware to parse JSON and urlencoded request bodies
+app.use(bodyParser.json());    // imp for using req.body
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors()); // this way we bypass the security and anyone can access the site 
 app.use(express.json());   // so that every data that express package gets (like email, pass, ..) will be converted to JSON  
 
 // const PORT = 8080;
 const PORT = 8080;
-
 
 mongoose.connect(
     `mongodb+srv://yashasviyadav:llgmCVZ37TEQM1qB@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority` ,
@@ -52,23 +58,37 @@ opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.PASSPORT_JWT_SECRETKEY;  // better to use from env variable (.env)
 // opts.issuer = 'accounts.examplesoft.com';   // these 2 are not mandotary lines 
 // opts.audience = 'yoursite.net';
-passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    // User.findOne({id: jwt_payload.sub}, function(err, user) {  //with this, all songs from all the diff users will be created under single user only (and this is an issue)
-        User.findOne({_id: jwt_payload.identifier}, function(err, user) {  // this will fix the above issue, each different songs by diff users will be listed under their individual 'mySongs' route only
+passport.use(new JwtStrategy(opts, async function(jwt_payload, done) {
+    // // User.findOne({id: jwt_payload.sub}, function(err, user) {  //with this, all songs from all the diff users will be created under single user only (and this is an issue)
+    //     User.findOne({_id: jwt_payload.identifier}, function(err, user) {  // this will fix the above issue, each different songs by diff users will be listed under their individual 'mySongs' route only
+
+    //     // in login
+    //     // done(error, isUserExists)
+
+    //     if (err) {   // if error found, then 'jwt tocken not matched', try to login again
+    //         return done(err, false);
+    //     }
+    //     if (user) {  // user found, jwt matched, user logged in 
+    //         return done(null, user);
+    //     } else {
+    //         return done(null, false);  // no error, no user, so create new account
+    //         // or you could create a new account
+    //     }
+    // });
+    try{
+        const user = await User.findOne({_id: jwt_payload.identifier});
 
         // in login
         // done(error, isUserExists)
-
-        if (err) {   // if error found, then 'jwt tocken not matched', try to login again
-            return done(err, false);
-        }
-        if (user) {  // user found, jwt matched, user logged in 
+        if(user){
             return done(null, user);
-        } else {
-            return done(null, false);  // no error, no user, so create new account
-            // or you could create a new account
         }
-    });
+        else {
+            return done(null, false);
+        }
+    }catch(error){
+        return done(error, false);
+    }
 })); 
 
 // defining a route 
