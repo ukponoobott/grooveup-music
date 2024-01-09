@@ -3,7 +3,7 @@ const express = require("express");
 // now we could import app from express() but it has a lot of functions like app.get(), app.post(), ... and we only need the Router method from the express so lets only import that for efficiency
 const router = express.Router();
 const User = require("../models/User");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const {getToken} = require("../utils/helpers");
 
 // /auth/register route 
