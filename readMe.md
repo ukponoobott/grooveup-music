@@ -1,7 +1,8 @@
 ### Introduction 
 This is a clone of popular music streaming service `Spotify`, made using `MERN` Stack with `tailwind.css`
 
-![](https://i.ibb.co/VjTXw59/image.png)
+<!-- ![](https://i.ibb.co/VjTXw59/image.png) -->
+![](https://i.ibb.co/s1g0Jwp/imaginarry.png)
 
 Working Screenshots :- 
 ![](https://i.ibb.co/Ny9FrHV/222.png)
