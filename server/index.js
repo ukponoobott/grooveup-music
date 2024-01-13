@@ -94,7 +94,8 @@ passport.use(new JwtStrategy(opts, async function(jwt_payload, done) {
 
 // defining a route 
 app.get("/", (req, res) => {  // if we use '/home' then server will run there
-    res.send("Hello World");
+    // res.send("Hello World");
+    res.send("This is GrooveUp music app backend !");
 })
 
 app.use('/auth', authRoutes);
