@@ -47,7 +47,7 @@ export default function Home(){
         <LoggedInContainer curActiveScreen={"home"}>  {/* now why we passed this curActiveScreen = home, bacause now wheverever this component renderes, this value 'home'is passed to the Logged In container.js and there that screen becomes active */}
             
             <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
-            <PlaylistView titleText={"Spotify Playlists"} cardsData={spotifyCardsPlaylist}/> 
+            <PlaylistView titleText={"More Playlists"} cardsData={spotifyCardsPlaylist}/> 
                         
         </LoggedInContainer>
     );
@@ -86,7 +86,7 @@ const PlaylistView = ({titleText, cardsData}) => {
 
 const Card = ({title, description, imgUrl}) => {
     return(
-        <div className='bg-black bg-opacity-40 w-1/5 p-4 rounded-lg '>
+        <div className='bg-black bg-opacity-40 w-1/5 p-4 rounded-lg border border-gray-200 border-opacity-10 cursor-pointer hover:bg-yellow-100 hover:bg-opacity-5 delay-50 duration-200 hover:border-gray-600'>
             <div className='pb-4 bt-2'>
                 <img 
                     className='w-full rounded-md'

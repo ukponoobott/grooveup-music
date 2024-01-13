@@ -27,9 +27,28 @@ export default function SignupComponent(){
     // console.log(setEmail);
 
 
+    const isValidEmail = (email) => {
+        // Define the email regex pattern
+        var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+        // Check if the email matches the pattern
+        return emailPattern.test(email);
+    }
+
     // this fuction will run whenever 'signup' button is clicked
     const signUp = async () => {
+
+        if(email.trim() === "" || password.trim() === "" || username.trim() === "" || firstName.trim() === "" || lastName.trim() === ""){
+            alert("empty fields not allowed");
+            return;
+        }
     
+        // valid email check
+        if(!isValidEmail(email)){
+            alert("email is not valid");
+            return;
+        }
+
         if(email !== confirmEmail){ // do not sign up
             alert("Email and confirm email must have same value");
             return;
@@ -60,14 +79,19 @@ export default function SignupComponent(){
 
         <div className='w-full h-full flex flex-col items-center'>
             
-            <div className="logo w-full flex justify-center p-2 border-b border-solid border-gray-300 ">
+            {/* <div className="logo w-full flex justify-center p-2 border-b border-solid border-gray-300 ">
                 <Icon icon="logos:spotify" width='130' />
-            </div>     
+            </div>      */}
+            <div className="bg-app-purple bg-opacity-5 border border-app-purple-80 logo space-x-5 w-full flex justify-center p-2  border-gray-300 ">
+                {/* <Icon icon="logos:spotify" width='130' /> */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="#050516" d="M18.65.226A16 16 0 0 0 16 0C7.16 0 0 7.16 0 16c0 3.394 1.067 6.53 2.86 9.131c1.1-1.616 3.637-2.731 6.578-2.731c2.02 0 3.847.533 5.156 1.39zm8.502 4.315c2.763 6.11.339 9.374.339 9.374c-1.875-5.64-7.305-6.464-7.305-6.464s-3.572 19.248-3.572 19.49c0 2.085-2.214 3.847-5.22 4.38A16.01 16.01 0 0 0 16 32c8.84 0 16-7.16 16-16c0-4.493-1.859-8.55-4.848-11.459"/></svg>
+                <div className='text-app-purple-light flex justify-center items-center font-bold text-2xl'>GrooveUp</div>
+            </div>
 
             <div className='inputRegion w-1/3 py-10 '>
                 {/* will have 2 inputs email and pass and have my signup button */}
                 <div className='font-bold mb-8 text-2xl'>
-                    Sign Up for free to start listening.
+                    Create New Account
                 </div>
                 <TextInput 
                     label="Email address" 
@@ -115,7 +139,9 @@ export default function SignupComponent(){
                 </div>
 
                 <div className='buttonContainer w-full flex justify-center my-5'>
-                    <button className='bg-spotify-green font-semibold p-3 px-10 rounded-full' onClick={(e) => {
+                    {/* <button className='w-full text-white bg-app-purple-light bg-opacity-70 font-semibold p-3 px-10 rounded hover:border-white cursor-pointer' onClick={(e) => { */}
+                    <button className='w-full font-semibold text-white py-3 rounded bg-app-purple-light bg-opacity-70 transition delay-100 cursor-pointer hover:bg-opacity-90' onClick={(e) => {
+                    
                         e.preventDefault(); // by default buttons have some default behaviour, so prevent that 
                         signUp(); // call the signup function when this button is clicked
                     }}>
@@ -130,7 +156,7 @@ export default function SignupComponent(){
                     Already have an account ?
                 </div>
 
-                <div className='w-full border-2 border-gray-400 text-gray-700 py-3 rounded-full'>
+                <div className='w-full border-2 border-gray-400 text-gray-700 py-3 rounded hover:bg-app-purple-light transition delay-100 hover:text-white hover:bg-opacity-70 hover:border-white cursor-pointer'>
                     <Link to="/login">
                         LOG IN INSTEAD
                     </Link>

@@ -1,6 +1,5 @@
 import React, { useContext, useLayoutEffect ,useRef} from 'react';
 import {useState} from 'react';
-import spotify_logo from '../assets/images/spotify_logo_white.svg'
 import IconText from '../components/shared/IconText';
 import { Icon } from '@iconify/react';
 import TextWithHover from '../components/shared/TextWithHover';
@@ -9,6 +8,8 @@ import songContext from '../contexts/songContext';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
 import AddToPlaylistModal from '../modals/AddToPlaylistModal';
 import { makeAuthenticatedPOSTRequest } from '../utils/serverHelpers';
+import { useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 /* ⭐imp note : so basically this file contains all the raw code for 'sideBar' 'navbar' and bottom 'songBar' which
                 is used as it is again and again in different routes like '/home' '/mySongs' '/search' etc so we want that we do not render these same things again and again
@@ -24,7 +25,6 @@ import { makeAuthenticatedPOSTRequest } from '../utils/serverHelpers';
                 in react this 'children' keyword is used for this purpose only so that the repeated code is not written again and again and only the non repeating code is 
                 writen as the child of the 'LoggedInContainer' here (for fast rendering)
 */
-
 
 
 export default function LoggedInContainer({children, curActiveScreen}){
@@ -116,9 +116,11 @@ export default function LoggedInContainer({children, curActiveScreen}){
             setAddToPlaylistModalOpen(false)
     }   
 
+    const navigate = useNavigate();
+    const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+
     return(
         <div className='h-full w-full bg-app-black'>
-            
 
             {/* only render the createPlaylistModal when this createPlaylistModalOpen state is set to true */}
             {createPlaylistModalOpen && <CreatePlaylistModal closeModal={()=>{setCreatePlaylistModalOpen(false)}}/> } {/* we passed the closeModal func as prop to this comp and inside that comp, when user clicks on outter div of the createplaylistModal this state will set to false */}  
@@ -136,10 +138,12 @@ export default function LoggedInContainer({children, curActiveScreen}){
             <div className={`${currentSong?("h-9/10"):("h-full")} w-full flex `}> {/* when a curr song is null means no song played by user then we this screen will be full (no song bar at bottom), if not null then this screen will take height of 90% of screnn and rest 10%is for songBar*/}
 
                 {/* this will be the left pannel */}
-                <div className='h-full w-1/5 bg-black flex flex-col justify-between pb-7'>
+                <div className='h-full w-1/5 bg-black flex flex-col justify-between pb-7'> 
                     <div>
-                        <div className='logoDiv p-5' >
-                            <img src={spotify_logo} alt="spotify logo" width={125} />
+                        <div className='logoDiv p-5 flex justify-start space-x-4 cursor-pointer' >
+                            {/* <img src={spotify_logo} alt="spotify logo" width={125} /> */} 
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="white" d="M18.65.226A16 16 0 0 0 16 0C7.16 0 0 7.16 0 16c0 3.394 1.067 6.53 2.86 9.131c1.1-1.616 3.637-2.731 6.578-2.731c2.02 0 3.847.533 5.156 1.39zm8.502 4.315c2.763 6.11.339 9.374.339 9.374c-1.875-5.64-7.305-6.464-7.305-6.464s-3.572 19.248-3.572 19.49c0 2.085-2.214 3.847-5.22 4.38A16.01 16.01 0 0 0 16 32c8.84 0 16-7.16 16-16c0-4.493-1.859-8.55-4.848-11.459"/></svg>
+                            <div className='text-white flex justify-center items-center font-semibold text-xl'>GrooveUp</div>
                         </div>
                         <div className='py-5'>
                             <IconText 
@@ -184,12 +188,12 @@ export default function LoggedInContainer({children, curActiveScreen}){
 
                     </div>
 
-                    <div className='px-6 '>
+                    {/* <div className='px-6 '>
                         <div className='border border-gray-400 text-white flex w-2/5 rounded-full flex justify-center items-center py-1 cursor-pointer hover:border-white'>
                             <Icon icon="humbleicons:globe" fontSize={18} />
-                            <div className='ml-1 text-sm font-semibold'>English</div>
+                            <div className='ml-1 text-sm font-semibold'>English</div> 
                         </div>
-                    </div>
+                    </div> */}
                     
                 </div>
 
@@ -200,19 +204,39 @@ export default function LoggedInContainer({children, curActiveScreen}){
                     <div className='navbar h-1/10 w-full bg-black bg-opacity-40 flex items-center justify-end'>
                         
                         <div className='h-full w-1/2 flex items-center'>
-                            <div className='h-full w-3/5 flex items-center justify-around '>
-                                <TextWithHover displayText={"Premium"}/>
+                            <div className='h-full w-2/5 flex items-center justify-around '>
+                                {/* <TextWithHover displayText={"Premium"}/>
                                 <TextWithHover displayText={"Support"}/>
                                 <TextWithHover displayText={"Download"}/>
                                 <div className='h-1/2 border border-gray-500'></div>
+                                 */}
                             </div>
-                            <div className='h-full w-2/5 flex items-center justify-around '>
-                                <TextWithHover 
+                            <div className='h-full w-3/5 flex items-center justify-around '>
+                                {/* <TextWithHover 
                                     displayText={"Upload Song"}
                                     targetLink={"/uploadSong"}
-                                />
+                                /> */}
+
+                                <div className='cursor-pointer bg-white  font-semibold  py-2 px-2 rounded text-black hover:opacity-90 delay-100 duration-150'
+                                    onClick={()=>{
+                                        navigate("/uploadSong");
+                                    }}
+                                >
+                                    Upload Song
+                                </div>
                                 <div className='h-10 w-10 py-4 px-4 bg-white flex justify-center items-center rounded-full font-semibold cursor-pointer hover:bg-gray-200'>
                                     U
+                                </div>
+                                
+
+                                <div className='text-white border flex justify-center space-x-2 items-center border-gray-500 py-2 px-3 rounded cursor-pointer duration-200 delay-100 text-sm hover:bg-white hover:bg-opacity-20 hover:font-bold hover:font-semibold '
+                                    onClick={()=>{
+                                        // removeCookie();
+                                        removeCookie("token");
+                                    }}
+                                >
+                                    <div> Log Out </div>
+                                    <Icon icon="line-md:log-out" fontSize={20}/>
                                 </div>
                             </div>
 

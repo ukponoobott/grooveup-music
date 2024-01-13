@@ -4,8 +4,11 @@ module.exports = {
   theme: {
     extend: {
       backgroundColor:{
+        "app-purple":"#020617",
+        "app-purple-light":"#050516",
         "spotify-green":"rgb(30 215 96)", // use like this :-   className="bg-spotify-green"
-        "app-black":"#1e1e1e", // used in spotify bg
+        // "app-black":"#1e1e1e", // used in spotify bg
+        "app-black":"#050516"
       },
       fontFamily:{
         "poppins":["Poppins", "sans-serif"] // key will be the keyword used while giving tailwind classes like className="font-poppins"

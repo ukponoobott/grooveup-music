@@ -1,8 +1,8 @@
 import React from 'react';
-import spotify_logo from '../assets/images/spotify_logo_white.svg'
 import IconText from '../components/shared/IconText';
 import { Icon } from '@iconify/react';
 import TextWithHover from '../components/shared/TextWithHover';
+import { useNavigate } from 'react-router-dom';
 
 // each playlist view stored in array of JSON objs where each object has data of each individual playlist 
 const focusCardsData = [
@@ -44,14 +44,20 @@ const spotifyCardsPlaylist = [
 ];
 
 export default function Home(){
+
+    const navigate = useNavigate();
+    
     return(
         <div className='h-full w-full flex'>
 
             {/* this will be the left pannel */}
             <div className='h-full w-1/5 bg-black flex flex-col justify-between pb-7'>
                 <div>
-                    <div className='logoDiv p-5' >
-                        <img src={spotify_logo} alt="spotify logo" width={125} />
+                    <div className='logoDiv p-5 flex justify-start space-x-4 cursor-pointer' >
+                        {/* <img src={spotify_logo} alt="spotify logo" width={125} /> */}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="white" d="M18.65.226A16 16 0 0 0 16 0C7.16 0 0 7.16 0 16c0 3.394 1.067 6.53 2.86 9.131c1.1-1.616 3.637-2.731 6.578-2.731c2.02 0 3.847.533 5.156 1.39zm8.502 4.315c2.763 6.11.339 9.374.339 9.374c-1.875-5.64-7.305-6.464-7.305-6.464s-3.572 19.248-3.572 19.49c0 2.085-2.214 3.847-5.22 4.38A16.01 16.01 0 0 0 16 32c8.84 0 16-7.16 16-16c0-4.493-1.859-8.55-4.848-11.459"/></svg>
+                        <div className='text-white flex justify-center items-center font-semibold text-xl'>GrooveUp</div>
+                        
                     </div>
                     <div className='py-5'>
                         <IconText iconName={"material-symbols:home"} displayText={"Home"} active />
@@ -66,13 +72,12 @@ export default function Home(){
 
                 </div>
 
-                <div className='px-6 '>
+                {/* <div className='px-6 '>
                     <div className='border border-gray-400 text-white flex w-2/5 rounded-full flex justify-center items-center py-1 cursor-pointer hover:border-white'>
                         <Icon icon="humbleicons:globe" fontSize={18} />
-                        
                         <div className='ml-1 text-sm font-semibold'>English</div>
                     </div>
-                </div>
+                </div> */}
                 
             </div>
 
@@ -81,26 +86,34 @@ export default function Home(){
                     
                 {/* in the right pannel this will be Navbar  */}
                 <div className='navbar h-1/10 w-full bg-black bg-opacity-40 flex items-center justify-end'>
-                    
+                     
                     <div className='h-full w-1/2 flex items-center'>
-                        <div className='h-full w-3/5 flex items-center justify-around '>
-                            <TextWithHover displayText={"Premium"}/>
+                        <div className='h-full w-3/5 flex items-center justify-around'>
+                            {/* <TextWithHover displayText={"Premium"}/>
                             <TextWithHover displayText={"Support"}/>
-                            <TextWithHover displayText={"Download"}/>
-                            <div className='h-1/2 border border-gray-500'></div>
+                            <TextWithHover displayText={"Download"}/> */}
+                            {/* <div className='h-1/2 border border-gray-500'></div> */}
                         </div>
-                        <div className='h-full w-2/5 flex items-center justify-around '>
-                            <TextWithHover displayText={"Sign Up"}/>
-                            <div className='h-3/4 py-4 px-5 bg-white flex justify-center items-center rounded-full font-semibold cursor-pointer hover:bg-gray-200'>Log in</div>
+                        <div className='h-full w-2/5 flex items-center justify-around pr-4'>
+                            <TextWithHover displayText={"Sign Up"} 
+                                targetLink={"/signup"}
+                            />
+                            <div className='h-3/4 py-4 px-5  bg-white flex justify-center items-center rounded font-semibold cursor-pointer hover:bg-gray-200'
+                                onClick={(e)=>{
+                                    navigate("/login");
+                                }}
+                            >
+                                Log in
+                            </div>
                         </div>
 
                     </div>
                 </div>
-
+ 
                 {/* this will be content below navbar */}
                 <div className='content h-9/10 p-8 pt-0 text-white overflow-auto'>
                     <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
-                    <PlaylistView titleText={"Spotify Playlists"} cardsData={spotifyCardsPlaylist}/>
+                    <PlaylistView titleText={"More Playlists"} cardsData={spotifyCardsPlaylist}/>
                     {/* <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/> */}
                     {/* <PlaylistView titleText={"Spotify Playlists"}/> 
                     <PlaylistView titleText={"Sounds of India"}/>  */}
@@ -143,8 +156,14 @@ const PlaylistView = ({titleText, cardsData}) => {
 }
 
 const Card = ({title, description, imgUrl}) => {
+    const navigate = useNavigate();
     return(
-        <div className='bg-black bg-opacity-40 w-1/5 p-4 rounded-lg '>
+       
+        <div className='bg-black bg-opacity-40 w-1/5 p-4 rounded-lg border border-gray-200 border-opacity-10 cursor-pointer'
+            onClick={()=>{
+                navigate("/signup");
+            }}
+        >
             <div className='pb-4 bt-2'>
                 <img 
                     className='w-full rounded-md'

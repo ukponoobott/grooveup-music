@@ -1,5 +1,4 @@
 import React from 'react';
-import spotify_logo from '../assets/images/spotify_logo_white.svg'
 import IconText from '../components/shared/IconText';
 import { Icon } from '@iconify/react';
 import TextWithHover from '../components/shared/TextWithHover';
