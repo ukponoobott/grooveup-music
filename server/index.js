@@ -40,7 +40,8 @@ app.use(express.json());   // so that every data that express package gets (like
 const PORT = 8080;
 
 mongoose.connect(
-    `mongodb+srv://yashasviyadav:llgmCVZ37TEQM1qB@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority` ,
+    // `mongodb+srv://yashasviyadav:llgmCVZ37TEQM1qB@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority` ,
+    `mongodb+srv://yashasviyadav:${process.env.MONGO_PASSWORD}@cluster0.c5n5f2b.mongodb.net/?retryWrites=true&w=majority` ,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
