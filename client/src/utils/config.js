@@ -2,4 +2,4 @@
 
 // export const backendUrl = "http://localhost:8080"; // local backend
 export const backendUrl = "https://grooveup-music-backend.vercel.app"; // deployed backend
- 
+

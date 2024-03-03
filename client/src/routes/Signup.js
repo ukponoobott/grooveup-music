@@ -22,10 +22,11 @@ export default function SignupComponent(){
     const [cookie, setCookie] = useCookies(["token"]); // use cookies state returns there 2 things
     const navigate = useNavigate();  // import this {hook} from react-router-dom to navigate from 1 route to another
 
+    const [displayLoading, setDisplayLoading] = useState(false);
+
     // ERROR FIXING STEPS :- 
     // console.log(email); // we can see that as we change value in email field,  the new value gets saved in value of that field
     // console.log(setEmail);
-
 
     const isValidEmail = (email) => {
         // Define the email regex pattern
@@ -54,6 +55,7 @@ export default function SignupComponent(){
             return;
         }
 
+        setDisplayLoading(true);
         const data = {email, password, username, firstName, lastName};// fetch the data stored in useState 
         
         // now we have the data in json format, so lets send it to the fun 'makeUnauthenticatedPOSTRequest' which will later send it to the API at backend 
@@ -69,9 +71,12 @@ export default function SignupComponent(){
             date.setDate(date.getDate() + 30); // set date to 30 days later coz we need to store cookies for 30 days only
             setCookie("token", token, {path: "/" ,expires: date}); // to store token in cookies we need to install "npm i react-cookie" package, using this "setCookies(key, value, {options})" we can set cookies, note: path is the cookies path where to store it
             alert('new account created');
+            setDisplayLoading(false);
             navigate("/home"); // go to home page when user acc is created, used from 'useNavigate' hook state
         }else{
-            alert("failure");
+            setDisplayLoading(false);
+            alert(response.err);
+            // alert("failure");
         }
     }
 
@@ -137,7 +142,7 @@ export default function SignupComponent(){
                         setValue={setLastName}
                     />
                 </div>
-
+                
                 <div className='buttonContainer w-full flex justify-center my-5'>
                     {/* <button className='w-full text-white bg-app-purple-light bg-opacity-70 font-semibold p-3 px-10 rounded hover:border-white cursor-pointer' onClick={(e) => { */}
                     <button className='w-full font-semibold text-white py-3 rounded bg-app-purple-light bg-opacity-70 transition delay-100 cursor-pointer hover:bg-opacity-90' onClick={(e) => {
@@ -148,6 +153,15 @@ export default function SignupComponent(){
                         SIGN UP
                     </button>
                 </div>
+                {
+                    displayLoading?(
+                        <div className='flex justify-center'>
+                            <Icon icon="line-md:loading-twotone-loop" fontSize={35}/>
+                        </div>
+                    ):(
+                        <div></div>
+                    )
+                }
 
                 <div className='w-full border border-gray-300'> 
                 </div>

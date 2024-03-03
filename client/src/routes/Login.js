@@ -19,15 +19,21 @@ export default function LoginComponent(){
     const [cookie, setCookie] = useCookies(["token"]);  // state for cookies
     const navigate = useNavigate(); // state for navigation i.e for eg to navigate to home page ones user is logged in successfully
 
-
+    const [displayLoading, setDisplayLoading] = useState(false);
     
     // this fuction will run whenever 'login' button is clicked
     const login = async () => {
 
+        if(email.trim() === "" || password.trim() === ""){
+            alert('fields should not be empty');
+            return;
+        }
+        setDisplayLoading(true);
         const data = {email, password}; // fetch the data stored in useState 
         
         // now we have the data in json format, so lets send it to the fun 'makeUnauthenticatedPOSTRequest' which will later send it to the API at backend 
         const response = await makeUnauthenticatedPOSTRequest("/auth/login", data); // 
+        setDisplayLoading(true);
         
         if(response && !response.err){ // if we did got a response ,and response does not have a 'err' key or error key that we send in the backend code
             // user exists and user credentials are stored in response (sent by the backend api of /auth/login)
@@ -39,8 +45,10 @@ export default function LoginComponent(){
             date.setDate(date.getDate() + 30); // set date to 30 days later coz we need to store cookies for 30 days only
             setCookie("token", token, {path: "/" ,expires: date}); // to store token in cookies we need to install "npm i react-cookie" package, using this "setCookies(key, value, {options})" we can set cookies, note: path is the cookies path where to store it
             alert('log in successful');
+            setDisplayLoading(false);
             navigate("/home"); // go to home page when user acc is created, used from 'useNavigate' hook state
         }else{
+            setDisplayLoading(false);
             alert("failure");
         }
     }
@@ -95,6 +103,18 @@ export default function LoginComponent(){
                         Create New Account
                     </Link>
                 </div>
+                {
+                    displayLoading?(
+                        <div className='flex justify-center pt-5'>
+                            <Icon icon="line-md:loading-loop"  fontSize={40}/>
+                        </div>
+                    ):(
+                        <div className='flex justify-center pt-5'>
+                            {/* <Icon icon="line-md:loading-loop"  fontSize={40}/> */}
+                        </div>
+                    )
+                }
+                
 
             </div>
             
