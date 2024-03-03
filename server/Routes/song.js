@@ -67,5 +67,13 @@ router.get("/get/songname/:songName", passport.authenticate("jwt", {session: fal
 })
 
 
+// get all songs from entire database 
+// /song/get/all
+router.get('/get/all', passport.authenticate('jwt', {session: false}), async (req,res) => {
+    const songs = await Song.find().populate("artist");
+    return res.status(200).json({data: songs});
+})
+
+
 module.exports = router;
 

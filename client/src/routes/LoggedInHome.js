@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect,useState, useContext } from 'react';
 import LoggedInContainer from '../containers/LoggedInContainer';
+import { makeAuthenticatedGETRequest } from '../utils/serverHelpers';
+import songContext from '../contexts/songContext';
 
 
 // each playlist view stored in array of JSON objs where each object has data of each individual playlist 
@@ -42,17 +44,75 @@ const spotifyCardsPlaylist = [
 ];
 
 export default function Home(){
+    
+    const [songsData, setSongsData] = useState([]);// array of song objects 
+
+    // we want whenever a user clicks on a single song card, data of that song which we get form 'info' prop, will be saved in the 'currSong' of context 'SongContext' for globally use
+    // one this to note is that in App.js i have already made logged in /myMusic route to access songContext and this 'singleSongCard' is a children of 'mySongs' route so it can also access that songcontext
+    const {currentSong, setCurrentSong} = useContext(songContext); // fetch these 2 values from songContext using hook 'useContext' make sure to use {} and not []
+
+    
+    // fetch all songs from backend
+    useEffect(()=>{
+
+        const getData = async () => {
+            const response = await makeAuthenticatedGETRequest('/song/get/all');
+            setSongsData(response.data);
+        }
+        getData();
+    },[])
+
+    
+
+
     return(
         // this below is the repeatitive 'sidebar' 'navbar' 'songBar' code  and inside it is the 'children' prop, (reference : src/containers/LoggedInContainer)
         <LoggedInContainer curActiveScreen={"home"}>  {/* now why we passed this curActiveScreen = home, bacause now wheverever this component renderes, this value 'home'is passed to the Logged In container.js and there that screen becomes active */}
             
-            <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
-            <PlaylistView titleText={"More Playlists"} cardsData={spotifyCardsPlaylist}/> 
+            {/* <PlaylistView titleText={"Focus"} cardsData={focusCardsData}/>
+            <PlaylistView titleText={"More Playlists"} cardsData={spotifyCardsPlaylist}/>  */}
                         
+            {/* updation : */}
+            <div className='text-left font-semibold text-xl py-5'> 
+                Top Songs 
+            </div>
+            <div className='w-full flex flex-wrap items-center justify-left'>
+                {
+                    songsData.map((songObject) => {
+                        return (
+                            <SongCard
+                                songObject={songObject}
+                                setCurrentSong={setCurrentSong}
+                            />
+                        )
+                    })
+                } 
+            </div>
+
         </LoggedInContainer>
     );
 }
 
+// on the logged in /home section these song cards are displayed
+// these are the songs from all over the database
+const SongCard = ({songObject, setCurrentSong}) => {
+    return(
+        <div className='p-2 flex-col justify-center items-center w-1/6 cursor-pointer mx-4 my-4' onClick={()=>{
+            setCurrentSong(songObject);
+        }}>
+           
+        
+            <div className='w-full'>
+                <img 
+                    src={songObject.thumbnail}
+                    className='rounded-xl w-full'
+                />
+            </div>
+            <div className='text-gray-300 text-left pt-2 pl-1 font-semibold text'> {songObject.name} </div>
+            <div className='text-gray-400 text-sm text-left pl-1'> {songObject.artistName} </div>
+        </div>
+    )
+}
 
 const PlaylistView = ({titleText, cardsData}) => {
     return (

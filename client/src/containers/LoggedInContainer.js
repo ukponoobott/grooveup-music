@@ -232,7 +232,10 @@ export default function LoggedInContainer({children, curActiveScreen}){
                                 <div className='text-white border flex justify-center space-x-2 items-center border-gray-500 py-2 px-3 rounded cursor-pointer duration-200 delay-100 text-sm hover:bg-white hover:bg-opacity-20 hover:font-bold hover:font-semibold '
                                     onClick={()=>{
                                         // removeCookie();
-                                        removeCookie("token");
+                                        const confirmLogout = window.confirm('Do you want to Log Out ?');
+                                        if(confirmLogout){
+                                            removeCookie("token");
+                                        }
                                     }}
                                 >
                                     <div> Log Out </div>

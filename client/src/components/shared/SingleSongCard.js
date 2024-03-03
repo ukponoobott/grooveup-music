@@ -5,9 +5,9 @@ import songContext from "../../contexts/songContext";
 export default function SingleSongCard({info, playSound}){ // 'info' prop will be passed in the myMusic.js to where this info is a object of each song sent my the 'MySong' API from the backend  
 
     // we want whenever a user clicks on a single song card, data of that song which we get form 'info' prop, will be saved in the 'currSong' of context 'SongContext' for globally use
-    // one this to note is that in App.js i have already made logged in /myMusic route to access songContext and this 'singleSongCard' is a children of 'mySongs' route so it can also access that songcontext
+    // one thing to note is that in App.js i have already made logged in /myMusic route to access songContext and this 'singleSongCard' is a children of 'mySongs' route so it can also access that songcontext
     const {currentSong, setCurrentSong} = useContext(songContext); // fetch these 2 values from songContext using hook 'useContext' make sure to use {} and not []
-
+    console.log(info);
 
     return(
 

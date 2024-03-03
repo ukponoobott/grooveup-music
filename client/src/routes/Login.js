@@ -49,7 +49,7 @@ export default function LoginComponent(){
             navigate("/home"); // go to home page when user acc is created, used from 'useNavigate' hook state
         }else{
             setDisplayLoading(false);
-            alert("failure");
+            alert(response.err);
         }
     }
  
