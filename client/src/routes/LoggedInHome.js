@@ -109,11 +109,13 @@ const SongCard = ({songObject, setCurrentSong}) => {
                 />
             </div>
             <div className='text-gray-300 text-left pt-2 pl-1 font-semibold text'> {songObject.name} </div>
-            <div className='text-gray-400 text-sm text-left pl-1'> {songObject.artistName} </div>
+            <div className='text-gray-500 text-sm text-left pl-1'> {songObject.artist.firstName + " " + songObject.artist.lastName}</div>
         </div>
     )
 }
 
+
+// with previous setup 
 const PlaylistView = ({titleText, cardsData}) => {
     return (
         <div className='text-white w-full mt-8'>
