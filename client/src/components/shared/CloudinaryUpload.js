@@ -10,7 +10,7 @@ const CloudinaryUpload = ({setUrl, setName}) => {
   const uploadImageWidget = () => {
     let myUploadWidget = openUploadWidget(
       {
-        cloudName: "drrlxyc7e", // this is ur cloud name u can get from ur cloudinary dashboard
+        cloudName: "dwcuuzhmg", // this is ur cloud name u can get from ur cloudinary dashboard
         uploadPreset: cloudinary_upload_preset,// do not use {cloudinary_upload_preset} , also this is ur upload preset, get it from cloudinary dashboard > settings > upload > upload presets > Name
         sources: ["local"] // we can add "camera" if we want input from camera of user
       },
