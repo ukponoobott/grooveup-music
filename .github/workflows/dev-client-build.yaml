@@ -2,7 +2,8 @@ name: 'Groove Music Client Dev Build'
 
 on:
   push:
-    branches: ["develop"]
+    branches:
+      - develop
     paths:
         - 'client/**'
   workflow_dispatch:
