@@ -29,14 +29,14 @@ jobs:
       - name: Build and push tag
         uses: docker/build-push-action@v5
         with:
-          context: client
+          context: "{{defaultContext}}:client"
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/groove-music-client:prod-build-${{ github.run_number }}
       
       - name: Build and push latest
         uses: docker/build-push-action@v5
         with:
-          context: client
+          context: "{{defaultContext}}:client"
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/groove-music-client:latest
           
@@ -59,13 +59,13 @@ jobs:
       - name: Build and push tag
         uses: docker/build-push-action@v5
         with:
-          context: server
+          context: "{{defaultContext}}:server"
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/groove-music-server:prod-build-${{ github.run_number }}
         
       - name: Build and push latest
         uses: docker/build-push-action@v5
         with:
-          context: server
+          context: "{{defaultContext}}:server"
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/groove-music-server:latest
