@@ -37,3 +37,12 @@ npm start
 - MongoDB
 - Tailwind.css
 - Cloudinary 
+
+### ENV
+- MONGO_CONNECTION_STRING
+- PASSPORT_JWT_SECRETKEY
+
+## VARS TO UPDATE (CLIENT)
+- backendUrl (src/utils/config.js)
+- cloudinary_upload_preset (src/config.js)
+- cloudName (src/components/shared/CloudinaryUpload.js)
