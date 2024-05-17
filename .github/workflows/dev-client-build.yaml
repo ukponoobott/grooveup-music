@@ -2,9 +2,10 @@ name: 'Groove Music Client Dev Build'
 
 on:
   push:
-    branches: ["develop"]
+    branches:
+      - develop
     paths:
-        - 'client/**'
+      - 'client/**'
   workflow_dispatch:
 
 permissions:
@@ -32,6 +33,6 @@ jobs:
       - name: Build Tag and push
         uses: docker/build-push-action@v5
         with:
-          context: ./client
+          context: client
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/groove-music-client:dev-build-${{ github.run_number }}
