@@ -5,7 +5,7 @@ on:
     branches:
       - develop
     paths:
-        - 'client/**'
+      - 'client/**'
   workflow_dispatch:
 
 permissions:
