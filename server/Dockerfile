@@ -1,4 +1,5 @@
-FROM node:20.13.1-bookworm-slim
+# FROM node:20.13.1-bookworm-slim
+FROM node:18-alpine
 
 # Setting up the work directory
 WORKDIR /server
