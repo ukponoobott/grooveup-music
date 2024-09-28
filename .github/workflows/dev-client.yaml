@@ -91,4 +91,4 @@ jobs:
       
       - name: Set Deployment Image
         run: |
-          kubectl set image deployment grooveup-frontend -n grooveup-client grooveup-frontend=groove-music-client:dev-build-${{ github.run_number }}
+          kubectl set image deployment grooveup-client -n grooveup-client grooveup-client=groove-music-client:dev-build-${{ github.run_number }}
