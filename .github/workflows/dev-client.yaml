@@ -44,7 +44,7 @@ jobs:
 
   wait-for-engineering-approval:
     name: Wait for Approval - Terraform Apply
-    runs-on: ${{ inputs.runner }}
+    runs-on: ubuntu-latest
     needs:
       - client-build
     environment:
