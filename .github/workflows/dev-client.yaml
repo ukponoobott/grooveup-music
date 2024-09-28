@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
       - name: List directory structure
-        run: ls -R
+        run: ls -al
       
       # - name: Build Tag and push
       #   uses: docker/build-push-action@v5
