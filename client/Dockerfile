@@ -12,7 +12,8 @@ RUN npm install
 COPY . .
 
 #Expose default REACT JS port
-EXPOSE 3000 
+EXPOSE 3000
+
 
 # Starting the application
 CMD ["npm","start"]
