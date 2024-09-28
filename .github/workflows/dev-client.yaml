@@ -42,10 +42,22 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/groove-music-client:dev-build-${{ github.run_number }}
 
+  wait-for-engineering-approval:
+    name: Wait for Approval - Terraform Apply
+    runs-on: ${{ inputs.runner }}
+    needs:
+      - client-build
+    environment:
+      name: engineering-approval
+    steps:
+      - name: "Wait for approval"
+        run: |
+          echo "Seems we've been approved."
+
   update-deployment:
     name: Update Deployment with Latest Build
     needs: 
-      - client-build
+      - wait-for-engineering-approval
     runs-on: ubuntu-latest
 
     defaults:
