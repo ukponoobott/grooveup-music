@@ -17,6 +17,9 @@ jobs:
     name: Build and Push Client Docker Image
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+        
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
