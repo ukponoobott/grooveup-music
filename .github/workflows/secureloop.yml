@@ -1,0 +1,161 @@
+# SecureLoop Security Scan
+# Drop this file into .github/workflows/ in your repo.
+#
+# Required GitHub secret:
+#   SECURELOOP_API_KEY — generate in SecureLoop dashboard → Settings → API Keys
+#
+# Optional secret (set SECURELOOP_API_URL if self-hosting, otherwise uses cloud):
+#   SECURELOOP_API_URL — defaults to http://localhost:3001 for local dev
+
+name: SecureLoop Security Scan
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  secureloop-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # needed to post PR comments
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history for secret scanning
+
+      - name: Run Trufflehog (secrets)
+        id: trufflehog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          extra_args: --json --no-update
+        continue-on-error: true
+
+      - name: Run Semgrep (OWASP / insecure patterns)
+        id: semgrep
+        uses: docker://semgrep/semgrep:latest
+        with:
+          args: semgrep --config auto --json --quiet /github/workspace
+        continue-on-error: true
+
+      - name: Run Trivy (dependency CVEs)
+        id: trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          format: json
+          output: trivy-results.json
+          exit-code: '0'
+        continue-on-error: true
+
+      - name: Post results to SecureLoop
+        env:
+          SECURELOOP_API_KEY: ${{ secrets.SECURELOOP_API_KEY }}
+          SECURELOOP_API_URL: ${{ secrets.SECURELOOP_API_URL || 'http://localhost:3001' }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Collect findings from all scanners into a unified JSON array
+          FINDINGS="[]"
+
+          # Trufflehog findings
+          if [ -f trufflehog-results.json ]; then
+            TH_FINDINGS=$(cat trufflehog-results.json | jq -c '
+              [.[] | {
+                ruleId: ("trufflehog:" + .DetectorName + ":" + (.SourceMetadata.Data.Filesystem.file // .SourceMetadata.Data.Git.file // "unknown")),
+                title: ("Exposed " + .DetectorName + " credential" + (if .Verified then " (verified active)" else "" end)),
+                description: ("A " + .DetectorName + " credential was found in " + (.SourceMetadata.Data.Filesystem.file // .SourceMetadata.Data.Git.file // "unknown")),
+                riskExplanation: (if .Verified then "This is a live, working credential exposed in source code. Treat as compromised immediately." else "A credential pattern was detected. Rotate as a precaution." end),
+                soc2Control: "CC6.1",
+                resource: ("${{ env.REPO }}/" + (.SourceMetadata.Data.Filesystem.file // .SourceMetadata.Data.Git.file // "unknown")),
+                severity: (if .Verified then "CRITICAL" else "HIGH" end),
+                remediationGuide: "Revoke and rotate the credential immediately. Remove from git history using git filter-repo or BFG."
+              }]
+            ' 2>/dev/null || echo "[]")
+            FINDINGS=$(echo "$FINDINGS $TH_FINDINGS" | jq -s 'add')
+          fi
+
+          # Trivy findings
+          if [ -f trivy-results.json ]; then
+            TV_FINDINGS=$(cat trivy-results.json | jq -c '
+              [.Results[]? | .Vulnerabilities[]? | {
+                ruleId: ("trivy:" + .VulnerabilityID + ":" + (.PkgName // "unknown")),
+                title: (.VulnerabilityID + " in " + .PkgName + "@" + .InstalledVersion),
+                description: ((.Title // .VulnerabilityID) + " — " + .PkgName + " " + .InstalledVersion + " has a known vulnerability." + (if .FixedVersion then " Fixed in " + .FixedVersion + "." else "" end)),
+                riskExplanation: "Unpatched dependency vulnerability. A known exploit may exist.",
+                soc2Control: "CC8.1",
+                resource: ("${{ env.REPO }}/" + .PkgName),
+                severity: (if .Severity == "CRITICAL" then "CRITICAL" elif .Severity == "HIGH" then "HIGH" elif .Severity == "MEDIUM" then "MEDIUM" else "LOW" end),
+                remediationGuide: (if .FixedVersion then "Update " + .PkgName + " to " + .FixedVersion else "No fix available yet — monitor the advisory." end)
+              }]
+            ' 2>/dev/null || echo "[]")
+            FINDINGS=$(echo "$FINDINGS $TV_FINDINGS" | jq -s 'add')
+          fi
+
+          # Post to SecureLoop API
+          PAYLOAD=$(jq -n \
+            --arg repo "$REPO" \
+            --arg branch "$BRANCH" \
+            --arg commitSha "$COMMIT_SHA" \
+            --argjson prNumber "${PR_NUMBER:-null}" \
+            --argjson findings "$FINDINGS" \
+            '{repo: $repo, branch: $branch, commitSha: $commitSha, prNumber: $prNumber, findings: $findings}')
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -X POST "$SECURELOOP_API_URL/ci/scans" \
+            -H "Authorization: Bearer $SECURELOOP_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -1)
+
+          echo "SecureLoop response ($HTTP_CODE): $BODY"
+
+          if [ "$HTTP_CODE" != "201" ]; then
+            echo "::warning::SecureLoop scan reporting failed (HTTP $HTTP_CODE)"
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let summary = '## SecureLoop Security Scan\n\n';
+
+            // Try to read trivy results for the PR comment
+            try {
+              const trivy = JSON.parse(fs.readFileSync('trivy-results.json', 'utf8'));
+              const vulns = trivy.Results?.flatMap(r => r.Vulnerabilities || []) || [];
+              const critical = vulns.filter(v => v.Severity === 'CRITICAL').length;
+              const high = vulns.filter(v => v.Severity === 'HIGH').length;
+
+              if (vulns.length === 0) {
+                summary += '✅ No dependency vulnerabilities found\n';
+              } else {
+                summary += `⚠️ **${vulns.length} dependency vulnerabilities** found`;
+                if (critical > 0) summary += ` (${critical} critical)`;
+                if (high > 0) summary += ` (${high} high)`;
+                summary += '\n';
+              }
+            } catch (e) {}
+
+            summary += '\n_Full findings are tracked in your [SecureLoop dashboard](http://localhost:3000)_';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
